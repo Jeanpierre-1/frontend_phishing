@@ -18,7 +18,8 @@ export interface AnalisisPhishing {
   confidence?: string;
   label?: number;
   recommendation?: string;
-  urllength?: number;
+  urlLength?: number; // ✅ Nombre correcto del backend
+  urllength?: number; // ⚠️ Deprecado, usar urlLength
   domain?: string;
   domainLength?: number;
   pathLength?: number;

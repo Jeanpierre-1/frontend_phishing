@@ -60,6 +60,8 @@ export class AnalisisDetalleComponent implements OnInit, OnDestroy {
           // Tomar el análisis más reciente (último del array)
           this.analisis = analisis[analisis.length - 1];
           console.log('✅ Mostrando análisis más reciente:', this.analisis);
+          console.log('📏 urllength:', this.analisis.urllength);
+          console.log('📏 Todas las propiedades:', Object.keys(this.analisis));
           this.cargando = false;
 
           setTimeout(() => {

@@ -235,6 +235,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 25px;
+  justify-items: center;
 }
 
 .grafico-card {
@@ -242,10 +243,13 @@
   border-radius: 16px;
   padding: 25px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
 }
 
 .grafico-card.grafico-full {
   grid-column: 1 / -1;
+  max-width: 100%;
 }
 
 .grafico-header {
@@ -267,6 +271,9 @@
 .grafico-container {
   height: 300px;
   margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Características */

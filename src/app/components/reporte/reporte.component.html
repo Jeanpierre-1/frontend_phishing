@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="header">
       <div class="header-content">
-        <h1>📊 {{ analisisId ? 'Reporte Detallado del Análisis' : 'Historial de Análisis' }}</h1>
+        <h1> {{ analisisId ? 'Reporte Detallado del Análisis' : 'Historial de Análisis' }}</h1>
         <p>{{ analisisId ? 'Características completas del análisis de phishing' : 'Visualiza estadísticas detalladas y gráficos del análisis de phishing' }}</p>
       </div>
       <div class="header-actions">
@@ -50,7 +50,7 @@
           </div>
 
           <div class="detalle-item">
-            <span class="detalle-label">📊 Probabilidad de Phishing:</span>
+            <span class="detalle-label">Probabilidad de Phishing:</span>
             <span class="detalle-value confianza-badge" [ngClass]="getConfianzaClass(analisisActual.probabilityPhishing || analisisActual.confianza)">
               {{ ((analisisActual.probabilityPhishing || analisisActual.confianza) * 100).toFixed(2) }}%
             </span>
@@ -59,11 +59,6 @@
           <div class="detalle-item">
             <span class="detalle-label">🎯 Nivel de Confianza:</span>
             <span class="detalle-value">{{ analisisActual.confidence }}</span>
-          </div>
-
-          <div class="detalle-item">
-            <span class="detalle-label">🏷️ Etiqueta:</span>
-            <span class="detalle-value">{{ analisisActual.label }}</span>
           </div>
 
           <div class="detalle-item">
@@ -146,16 +141,6 @@
             <span class="detalle-value">{{ analisisActual.suspiciousKeywords }}</span>
           </div>
 
-          <div class="detalle-item">
-            <span class="detalle-label">⏱️ Tiempo de Respuesta API:</span>
-            <span class="detalle-value">{{ analisisActual.apiResponseTime }} ms</span>
-          </div>
-
-          <div class="detalle-item">
-            <span class="detalle-label">📌 Versión de Análisis:</span>
-            <span class="detalle-value">{{ analisisActual.analysisVersion }}</span>
-          </div>
-
           <div class="detalle-item full-width" *ngIf="analisisActual.message">
             <span class="detalle-label">💬 Mensaje:</span>
             <span class="detalle-value">{{ analisisActual.message }}</span>
@@ -170,7 +155,7 @@
 
       <!-- Estadísticas Generales -->
       <div class="estadisticas-section">
-        <h2 class="section-title">📈 Estadísticas Generales</h2>
+        <h2 class="section-title">Estadísticas Generales</h2>
 
         <div class="estadisticas-grid">
           <!-- Total de Análisis -->
@@ -213,50 +198,120 @@
 
       <!-- Gráficos -->
       <div class="graficos-section">
-        <h2 class="section-title">📊 Visualización de Datos</h2>
+        <div class="section-header-graficos">
+          <div class="section-icon"></div>
+          <div>
+            <h2 class="section-title">Visualización de Datos</h2>
 
-        <div class="graficos-grid">
+          </div>
+        </div>
+
+        <div class="graficos-grid-mejorado">
           <!-- Gráfico de Riesgo Actual -->
-          <div class="grafico-card" *ngIf="analisisActual">
-            <div class="grafico-header">
-              <h3>Nivel de Riesgo Actual</h3>
-              <p class="grafico-descripcion">Evaluación del análisis reciente</p>
+          <div class="grafico-card-mejorado" *ngIf="analisisActual">
+            <div class="grafico-header-mejorado">
+              <div class="grafico-titulo-grupo">
+                <div class="icono-grafico">⚠️</div>
+                <div>
+                  <h3>Nivel de Riesgo</h3>
+                  <p class="grafico-descripcion">Evaluación del riesgo detectado</p>
+                </div>
+              </div>
+              <div class="grafico-badge">
+                <span>Análisis Actual</span>
+              </div>
             </div>
-            <div class="grafico-container">
+            <div class="grafico-container-mejorado">
               <canvas id="chartRiesgo"></canvas>
+            </div>
+            <div class="grafico-footer">
+              <div class="metric-item">
+                <span class="metric-label">Probabilidad</span>
+                <span class="metric-value riesgo">{{ ((analisisActual.probabilityPhishing || analisisActual.confianza) * 100).toFixed(1) }}%</span>
+              </div>
             </div>
           </div>
 
           <!-- Gráfico de Historial -->
-          <div class="grafico-card" *ngIf="historialAnalisis.length > 0">
-            <div class="grafico-header">
-              <h3>Distribución de Análisis</h3>
-              <p class="grafico-descripcion">Phishing vs Sitios Seguros</p>
+          <div class="grafico-card-mejorado" *ngIf="historialAnalisis.length > 0">
+            <div class="grafico-header-mejorado">
+              <div class="grafico-titulo-grupo">
+                <div class="icono-grafico">📈</div>
+                <div>
+                  <h3>Distribución de Análisis</h3>
+                  <p class="grafico-descripcion">Phishing vs Sitios Seguros</p>
+                </div>
+              </div>
+              <div class="grafico-badge success">
+                <span>{{ totalAnalisis }} Total</span>
+              </div>
             </div>
-            <div class="grafico-container">
+            <div class="grafico-container-mejorado">
               <canvas id="chartHistorial"></canvas>
+            </div>
+            <div class="grafico-footer">
+              <div class="metric-item">
+                <span class="metric-label">Phishing</span>
+                <span class="metric-value danger">{{ phishingDetectado }}</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">Seguros</span>
+                <span class="metric-value success">{{ seguros }}</span>
+              </div>
             </div>
           </div>
 
           <!-- Gráfico de Características -->
-          <div class="grafico-card grafico-full" *ngIf="analisisActual">
-            <div class="grafico-header">
-              <h3>Análisis de Características de la URL</h3>
-              <p class="grafico-descripcion">Indicadores de seguridad evaluados</p>
+          <div class="grafico-card-mejorado" *ngIf="analisisActual">
+            <div class="grafico-header-mejorado">
+              <div class="grafico-titulo-grupo">
+                <div class="icono-grafico">🔍</div>
+                <div>
+                  <h3>Análisis de Características</h3>
+                  <p class="grafico-descripcion">Indicadores de seguridad evaluados</p>
+                </div>
+              </div>
+              <div class="grafico-badge info">
+                <span>Análisis Detallado</span>
+              </div>
             </div>
-            <div class="grafico-container">
+            <div class="grafico-container-mejorado">
               <canvas id="chartCaracteristicas"></canvas>
+            </div>
+            <div class="caracteristicas-resumen">
+              <div class="caracteristica-item">
+                <span class="caracteristica-icono">🔒</span>
+                <span class="caracteristica-nombre">HTTPS</span>
+                <span class="caracteristica-valor" [class.activo]="analisisActual.hasHttps">
+                  {{ analisisActual.hasHttps ? 'Sí' : 'No' }}
+                </span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-icono">🌐</span>
+                <span class="caracteristica-nombre">Subdominios</span>
+                <span class="caracteristica-valor">{{ analisisActual.numberOfSubdomains }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-icono">🔤</span>
+                <span class="caracteristica-nombre">Caracteres Especiales</span>
+                <span class="caracteristica-valor">{{ analisisActual.specialCharactersCount }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-icono">🔢</span>
+                <span class="caracteristica-nombre">Dígitos</span>
+                <span class="caracteristica-valor">{{ analisisActual.digitsInUrl }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Tabla de Historial - SOLO si NO hay analisisId específico -->
-      <div class="historial-section" *ngIf="historialAnalisis.length > 1">
+      <!-- Tabla de Historial -->
+      <div class="historial-section" *ngIf="historialAnalisis.length > 0 && !analisisId">
         <div class="section-header">
           <h2 class="section-title">📋 Historial de Análisis</h2>
           <div class="historial-info">
-            <span class="info-badge">Mostrando {{ historialAnalisis.length }} registros</span>
+            <span class="info-badge">Mostrando {{ historialAnalisis.length }} {{ historialAnalisis.length === 1 ? 'registro' : 'registros' }}</span>
           </div>
         </div>
 
