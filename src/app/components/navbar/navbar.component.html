@@ -1,0 +1,22 @@
+<!-- filepath: d:\Proyecto_Phishing\phishing-frontend\src\app\components\navbar\navbar.component.html -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand" [routerLink]="['/']">
+      <span class="brand-icon">🛡️</span>
+      <span class="brand-text">AntiWebPhish</span>
+    </div>
+
+    <div class="navbar-actions" *ngIf="!isAuthenticated">
+      <button class="btn-iniciar" [routerLink]="['/login']">Iniciar sesión</button>
+      <button class="btn-registrar" [routerLink]="['/register']">Registrarse</button>
+    </div>
+
+    <div class="navbar-actions" *ngIf="showLogoutButton">
+      <button class="btn-nav" [routerLink]="['/home']">🏠 Inicio</button>
+      <button class="btn-nav" [routerLink]="['/reportes']">📊 Reportes</button>
+      <button class="btn-logout" (click)="logout()">
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+</nav>

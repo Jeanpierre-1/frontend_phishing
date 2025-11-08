@@ -1,0 +1,344 @@
+<div class="reportes-container">
+  <div class="reportes-content">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <h1>📊 {{ analisisId ? 'Reporte Detallado del Análisis' : 'Historial de Análisis' }}</h1>
+        <p>{{ analisisId ? 'Características completas del análisis de phishing' : 'Visualiza estadísticas detalladas y gráficos del análisis de phishing' }}</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-action btn-volver" (click)="volverAlInicio()">
+          ← Volver al Inicio
+        </button>
+        <button class="btn-action btn-exportar-pdf" (click)="exportarPDF()">
+          📥 Exportar PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="cargando">
+      <div class="spinner"></div>
+      <p>Cargando datos del reporte...</p>
+    </div>
+
+    <!-- Contenido del Reporte -->
+    <div class="reporte-content" *ngIf="!cargando">
+
+      <!-- Análisis Actual (si existe) -->
+      <div class="analisis-detalle-card" *ngIf="analisisActual">
+        <div class="card-header-detalle">
+          <h2>🔍 Análisis Detallado</h2>
+          <span class="badge-resultado"
+                [ngClass]="analisisActual.isPhishing ? 'badge-peligro' : 'badge-seguro'">
+            {{ analisisActual.isPhishing ? '⚠️ PHISHING DETECTADO' : '✅ SITIO SEGURO' }}
+          </span>
+        </div>
+
+        <div class="detalle-grid">
+          <div class="detalle-item full-width">
+            <span class="detalle-label">🔗 URL Analizada:</span>
+            <span class="detalle-value url-value">{{ analisisActual.urlEnlace || analisisActual.enlaceUrl }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">📅 Fecha de Análisis:</span>
+            <span class="detalle-value">
+              {{ analisisActual.analysisTimestamp || analisisActual.fecha | date:'dd/MM/yyyy HH:mm:ss' }}
+            </span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">📊 Probabilidad de Phishing:</span>
+            <span class="detalle-value confianza-badge" [ngClass]="getConfianzaClass(analisisActual.probabilityPhishing || analisisActual.confianza)">
+              {{ ((analisisActual.probabilityPhishing || analisisActual.confianza) * 100).toFixed(2) }}%
+            </span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🎯 Nivel de Confianza:</span>
+            <span class="detalle-value">{{ analisisActual.confidence }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🏷️ Etiqueta:</span>
+            <span class="detalle-value">{{ analisisActual.label }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">📏 Longitud de URL:</span>
+            <span class="detalle-value">{{ analisisActual.urllength }} caracteres</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🌐 Dominio:</span>
+            <span class="detalle-value">{{ analisisActual.domain }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">📐 Longitud del Dominio:</span>
+            <span class="detalle-value">{{ analisisActual.domainLength }} caracteres</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">📂 Longitud del Path:</span>
+            <span class="detalle-value">{{ analisisActual.pathLength }} caracteres</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🔒 Protocolo:</span>
+            <span class="detalle-value">{{ analisisActual.protocol }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">✅ Tiene HTTPS:</span>
+            <span class="detalle-value">{{ analisisActual.hasHttps ? 'Sí' : 'No' }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">❓ Tiene Query Params:</span>
+            <span class="detalle-value">{{ analisisActual.hasQuery ? 'Sí' : 'No' }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🔤 Caracteres Especiales:</span>
+            <span class="detalle-value">{{ analisisActual.specialCharactersCount }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🔢 Dígitos en URL:</span>
+            <span class="detalle-value">{{ analisisActual.digitsInUrl }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🔢 Dígitos en Dominio:</span>
+            <span class="detalle-value">{{ analisisActual.digitsInDomain }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🔁 Dígitos Repetidos:</span>
+            <span class="detalle-value">{{ analisisActual.hasRepeatedDigits ? 'Sí' : 'No' }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">🌐 Número de Subdominios:</span>
+            <span class="detalle-value">{{ analisisActual.numberOfSubdomains }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">• Puntos en Dominio:</span>
+            <span class="detalle-value">{{ analisisActual.dotsInDomain }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">- Guiones en Dominio:</span>
+            <span class="detalle-value">{{ analisisActual.hyphensInDomain }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">⚠️ Palabras Sospechosas:</span>
+            <span class="detalle-value">{{ analisisActual.suspiciousKeywordsCount }}</span>
+          </div>
+
+          <div class="detalle-item full-width" *ngIf="analisisActual.suspiciousKeywords">
+            <span class="detalle-label">🔍 Lista de Palabras Sospechosas:</span>
+            <span class="detalle-value">{{ analisisActual.suspiciousKeywords }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">⏱️ Tiempo de Respuesta API:</span>
+            <span class="detalle-value">{{ analisisActual.apiResponseTime }} ms</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="detalle-label">📌 Versión de Análisis:</span>
+            <span class="detalle-value">{{ analisisActual.analysisVersion }}</span>
+          </div>
+
+          <div class="detalle-item full-width" *ngIf="analisisActual.message">
+            <span class="detalle-label">💬 Mensaje:</span>
+            <span class="detalle-value">{{ analisisActual.message }}</span>
+          </div>
+
+          <div class="detalle-item full-width" *ngIf="analisisActual.recommendation">
+            <span class="detalle-label">💡 Recomendación:</span>
+            <span class="detalle-value">{{ analisisActual.recommendation }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas Generales -->
+      <div class="estadisticas-section">
+        <h2 class="section-title">📈 Estadísticas Generales</h2>
+
+        <div class="estadisticas-grid">
+          <!-- Total de Análisis -->
+          <div class="stat-card stat-total">
+            <div class="stat-icon">📊</div>
+            <div class="stat-info">
+              <div class="stat-number">{{ totalAnalisis }}</div>
+              <div class="stat-label">Total de Análisis</div>
+            </div>
+          </div>
+
+          <!-- Phishing Detectado -->
+          <div class="stat-card stat-phishing">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-info">
+              <div class="stat-number">{{ phishingDetectado }}</div>
+              <div class="stat-label">Phishing Detectado</div>
+            </div>
+          </div>
+
+          <!-- Sitios Seguros -->
+          <div class="stat-card stat-seguro">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <div class="stat-number">{{ seguros }}</div>
+              <div class="stat-label">Sitios Seguros</div>
+            </div>
+          </div>
+
+          <!-- Porcentaje de Amenazas -->
+          <div class="stat-card stat-porcentaje">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-info">
+              <div class="stat-number">{{ porcentajePhishing }}%</div>
+              <div class="stat-label">% de Amenazas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="graficos-section">
+        <h2 class="section-title">📊 Visualización de Datos</h2>
+
+        <div class="graficos-grid">
+          <!-- Gráfico de Riesgo Actual -->
+          <div class="grafico-card" *ngIf="analisisActual">
+            <div class="grafico-header">
+              <h3>Nivel de Riesgo Actual</h3>
+              <p class="grafico-descripcion">Evaluación del análisis reciente</p>
+            </div>
+            <div class="grafico-container">
+              <canvas id="chartRiesgo"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfico de Historial -->
+          <div class="grafico-card" *ngIf="historialAnalisis.length > 0">
+            <div class="grafico-header">
+              <h3>Distribución de Análisis</h3>
+              <p class="grafico-descripcion">Phishing vs Sitios Seguros</p>
+            </div>
+            <div class="grafico-container">
+              <canvas id="chartHistorial"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfico de Características -->
+          <div class="grafico-card grafico-full" *ngIf="analisisActual">
+            <div class="grafico-header">
+              <h3>Análisis de Características de la URL</h3>
+              <p class="grafico-descripcion">Indicadores de seguridad evaluados</p>
+            </div>
+            <div class="grafico-container">
+              <canvas id="chartCaracteristicas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Historial - SOLO si NO hay analisisId específico -->
+      <div class="historial-section" *ngIf="historialAnalisis.length > 1">
+        <div class="section-header">
+          <h2 class="section-title">📋 Historial de Análisis</h2>
+          <div class="historial-info">
+            <span class="info-badge">Mostrando {{ historialAnalisis.length }} registros</span>
+          </div>
+        </div>
+
+        <div class="tabla-wrapper">
+          <table class="tabla-historial">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>URL</th>
+                <th>Resultado</th>
+                <th>Confianza</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let analisis of historialAnalisis; let i = index"
+                  [ngClass]="analisis.isPhishing ? 'row-phishing' : 'row-seguro'">
+                <td class="td-index">{{ i + 1 }}</td>
+                <td class="td-fecha">
+                  {{ analisis.analysisTimestamp || analisis.fecha | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="td-url">
+                  <a class="url-link"
+                     [title]="analisis.urlEnlace || analisis.enlaceUrl"
+                     (click)="verAnalisisEspecifico(analisis.enlaceId ?? analisis.id ?? 0)"
+                     *ngIf="analisis.enlaceId || analisis.id">
+                    {{ analisis.urlEnlace || analisis.enlaceUrl }}
+                  </a>
+                  <span class="url-truncate" *ngIf="!analisis.enlaceId && !analisis.id">
+                    {{ analisis.urlEnlace || analisis.enlaceUrl }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge-resultado-tabla"
+                        [ngClass]="analisis.isPhishing ? 'badge-danger' : 'badge-success'">
+                    {{ analisis.isPhishing ? '⚠️ Phishing' : '✅ Seguro' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="confianza-container">
+                    <span class="confianza-valor">
+                      {{ ((analisis.probabilityPhishing || analisis.confianza) * 100).toFixed(1) }}%
+                    </span>
+                    <div class="confianza-barra">
+                      <div class="confianza-progreso"
+                           [style.width.%]="(analisis.probabilityPhishing || analisis.confianza) * 100"
+                           [ngClass]="getConfianzaClass(analisis.probabilityPhishing || analisis.confianza)">
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="acciones-grupo">
+                    <button class="btn-mini btn-ver"
+                            (click)="verDetallesAnalisis(analisis)"
+                            title="Ver detalles">
+                      👁️
+                    </button>
+                    <button class="btn-mini btn-eliminar"
+                            (click)="eliminarAnalisis(analisis)"
+                            title="Eliminar análisis">
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Estado Vacío -->
+      <div class="empty-state" *ngIf="!analisisActual && historialAnalisis.length === 0">
+        <div class="empty-icon">📊</div>
+        <h3 class="empty-title">No hay datos para mostrar</h3>
+        <p class="empty-subtitle">Realiza un análisis primero para ver el reporte completo</p>
+        <button class="btn-empty" (click)="volverAlInicio()">
+          Ir al Analizador
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

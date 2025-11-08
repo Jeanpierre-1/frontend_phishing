@@ -1,0 +1,43 @@
+<div class="login-wrapper">
+  <div class="login-container">
+    <h2 class="login-title">Iniciar sesión</h2>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          id="username"
+          [ngModelOptions]="{standalone:true}"
+          [(ngModel)]="username"
+          placeholder="Correo electrónico"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          [ngModelOptions]="{standalone:true}"
+          [(ngModel)]="password"
+          placeholder="Contraseña"
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn-login" [disabled]="isLoading">
+        {{ isLoading ? 'Iniciando...' : 'Iniciar sesión' }}
+      </button>
+
+      <div class="forgot-password">
+        <a href="#">¿Has olvidado tu contraseña?</a>
+      </div>
+
+      <div class="register-link">
+        ¿Has olvidado tu contraseña? <a [routerLink]="['/register']">Regístrate</a>
+      </div>
+    </form>
+  </div>
+</div>

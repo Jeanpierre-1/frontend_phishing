@@ -1,0 +1,75 @@
+<div class="register-wrapper">
+  <div class="register-container">
+    <h2 class="register-title">Crear una cuenta</h2>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          id="nombre"
+          [ngModelOptions]="{standalone:true}"
+          [(ngModel)]="nombre"
+          placeholder="Nombre(s)"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          id="apellido"
+          [ngModelOptions]="{standalone:true}"
+          [(ngModel)]="apellido"
+          placeholder="Apellido(s)"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          type="email"
+          class="form-control"
+          id="username"
+          [ngModelOptions]="{standalone:true}"
+          [(ngModel)]="username"
+          placeholder="Correo electrónico"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          [ngModelOptions]="{standalone:true}"
+          [(ngModel)]="password"
+          placeholder="Contraseña"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          type="password"
+          class="form-control"
+          id="confirmPassword"
+          [ngModelOptions]="{standalone:true}"
+          [(ngModel)]="confirmPassword"
+          placeholder="Confirmar Contraseña"
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn-register" [disabled]="isLoading">
+        {{ isLoading ? 'Registrando...' : 'Registrarse' }}
+      </button>
+
+      <div class="login-link">
+        ¿Ya tienes una cuenta? <a [routerLink]="['/login']">Inicia sesión</a>
+      </div>
+    </form>
+  </div>
+</div>

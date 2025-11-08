@@ -1,0 +1,172 @@
+<div class="home-container">
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Detecta mensajes<br>de phishing en<br>segundos</h1>
+        <p class="hero-subtitle">Protege tu información digital con IA</p>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-icon">📊</div>
+            <div class="stat-text">
+              <strong>Más de 5000</strong><br>
+              URL verificadas
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">🌐</div>
+            <div class="stat-text">
+              <strong>Más del 90 %</strong><br>
+              de precisión
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-content">
+              <div class="message-bubble">
+                <span class="message-icon">⚠️</span>
+                <p>Enlace sospechoso detectado</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Section -->
+  <section class="form-section">
+    <h2>Verifica tu enlace sospechoso</h2>
+
+    <form class="analisis-form" (ngSubmit)="analizarAhora()">
+      <div class="form-group">
+        <label for="url">URL del mensaje *</label>
+        <div class="input-with-icon">
+          <span class="input-icon">🔗</span>
+          <input
+            type="text"
+            id="url"
+            class="form-input"
+            [(ngModel)]="urlAnalisis"
+            name="url"
+            placeholder="https://ejemplo.com"
+            [disabled]="isAnalyzing"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="mensaje">Mensaje completo (opcional)</label>
+        <div class="input-with-icon">
+          <span class="input-icon">✉️</span>
+          <textarea
+            id="mensaje"
+            class="form-textarea"
+            [(ngModel)]="mensajeCompleto"
+            name="mensaje"
+            placeholder="Ingresa el mensaje que recibiste..."
+            [disabled]="isAnalyzing"
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="aplicacion">Aplicación</label>
+        <select
+          id="aplicacion"
+          class="form-select"
+          [(ngModel)]="aplicacion"
+          name="aplicacion"
+          [disabled]="isAnalyzing"
+        >
+          <option value="web">Navegador Web</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="email">Correo Electrónico</option>
+          <option value="telegram">Telegram</option>
+          <option value="messenger">Messenger</option>
+          <option value="sms">SMS</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+
+      <button
+        type="submit"
+        class="btn-analizar"
+        [disabled]="isAnalyzing"
+      >
+        <span *ngIf="!isAnalyzing">Analizar ahora</span>
+        <span *ngIf="isAnalyzing">
+          <span class="spinner"></span> Analizando...
+        </span>
+      </button>
+    </form>
+  </section>
+
+  <!-- Resultado Section -->
+  <section class="resultado-section" *ngIf="mostrarResultado" id="resultado-analisis">
+    <div class="resultado-card" [ngClass]="esPhishing ? 'resultado-peligroso' : 'resultado-seguro'">
+
+      <div class="resultado-header">
+        <div class="resultado-icon-circle" [ngClass]="esPhishing ? 'icon-peligro' : 'icon-seguro'">
+          <span class="resultado-icon">{{ esPhishing ? '!' : '✓' }}</span>
+        </div>
+        <h2>{{ esPhishing ? 'Phishing Detectado' : 'Sitio Seguro' }}</h2>
+      </div>
+
+      <div class="resultado-body">
+        <div class="nivel-riesgo">
+          <div class="nivel-riesgo-header">
+            <span class="nivel-label">Nivel de riesgo:</span>
+            <span class="nivel-porcentaje">{{ porcentajeRiesgo }}%</span>
+          </div>
+          <div class="nivel-barras">
+            <div
+              class="barra"
+              *ngFor="let num of getNivelRiesgoArray()"
+              [ngClass]="{
+                'barra-activa': num <= nivelRiesgo,
+                'barra-peligro': esPhishing,
+                'barra-seguro': !esPhishing
+              }"
+            ></div>
+          </div>
+        </div>
+
+        <div class="resultado-detalles">
+          <div class="detalles-column">
+            <h3>Detalles:</h3>
+            <ul class="detalles-list">
+              <li *ngFor="let detalle of detalles">
+                <span class="bullet">•</span> {{ detalle }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="detalles-column">
+            <h3>Recomendaciones:</h3>
+            <ul class="detalles-list">
+              <li *ngFor="let recomendacion of recomendaciones">
+                <span class="bullet">•</span> {{ recomendacion }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+         <button class="btn-reporte-completo" (click)="verReporteCompleto()">
+          <span class="btn-icon">{{ isAuthenticated() ? '📊' : '🔒' }}</span>
+          {{ isAuthenticated() ? 'Ver reporte completo' : 'Iniciar sesión para ver el reporte completo' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+</div>

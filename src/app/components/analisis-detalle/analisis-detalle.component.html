@@ -1,0 +1,248 @@
+<div class="analisis-detalle-container">
+  <div class="analisis-detalle-content">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <h1>📊 Reporte Detallado del Análisis</h1>
+        <p>Características completas del análisis de phishing</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-action btn-volver" (click)="volverAlInicio()">
+          ← Volver al Inicio
+        </button>
+        <button class="btn-action btn-historial" (click)="verHistorial()">
+          📋 Ver Historial
+        </button>
+        <button class="btn-action btn-exportar-pdf" (click)="exportarPDF()">
+          📥 Exportar PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="cargando">
+      <div class="spinner"></div>
+      <p>Cargando análisis...</p>
+    </div>
+
+    <!-- Contenido del Análisis -->
+    <div class="analisis-content" *ngIf="!cargando && analisis">
+
+      <!-- Análisis Detallado -->
+      <div class="analisis-card">
+        <div class="card-header">
+          <h2>🔍 Resultado del Análisis</h2>
+          <span class="badge-resultado" [ngClass]="analisis.isPhishing ? 'badge-peligro' : 'badge-seguro'">
+            {{ analisis.isPhishing ? '⚠️ PHISHING DETECTADO' : '✅ SITIO SEGURO' }}
+          </span>
+        </div>
+
+        <div class="detalle-grid">
+          <!-- URL -->
+          <div class="detalle-item full-width">
+            <span class="detalle-label">🔗 URL Analizada</span>
+            <span class="detalle-value url-value">{{ analisis.urlEnlace || analisis.enlaceUrl }}</span>
+          </div>
+
+          <!-- Fecha -->
+          <div class="detalle-item">
+            <span class="detalle-label">📅 Fecha de Análisis</span>
+            <span class="detalle-value">
+              {{ analisis.analysisTimestamp || analisis.fecha | date:'dd/MM/yyyy HH:mm:ss' }}
+            </span>
+          </div>
+
+          <!-- Probabilidad -->
+          <div class="detalle-item">
+            <span class="detalle-label">📊 Probabilidad de Phishing</span>
+            <span class="detalle-value confianza-badge" [ngClass]="getConfianzaClass(analisis.probabilityPhishing || analisis.confianza)">
+              {{ ((analisis.probabilityPhishing || analisis.confianza) * 100).toFixed(2) }}%
+            </span>
+          </div>
+
+          <!-- Confianza -->
+          <div class="detalle-item">
+            <span class="detalle-label">🎯 Nivel de Confianza</span>
+            <span class="detalle-value confidence-badge" [ngClass]="analisis.confidence?.toLowerCase()">
+              {{ analisis.confidence || 'N/A' }}
+            </span>
+          </div>
+
+          <!-- Mensaje -->
+          <div class="detalle-item full-width" *ngIf="analisis.message">
+            <span class="detalle-label">💬 Mensaje</span>
+            <span class="detalle-value">{{ analisis.message }}</span>
+          </div>
+
+          <!-- Recomendación -->
+          <div class="detalle-item full-width" *ngIf="analisis.recommendation">
+            <span class="detalle-label">💡 Recomendación</span>
+            <span class="detalle-value recommendation">{{ analisis.recommendation }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="graficos-section">
+        <h2 class="section-title">📊 Visualización de Datos</h2>
+
+        <div class="graficos-grid">
+          <!-- Gráfico de Riesgo -->
+          <div class="grafico-card">
+            <div class="grafico-header">
+              <h3>Nivel de Riesgo</h3>
+              <p class="grafico-descripcion">Evaluación del riesgo detectado</p>
+            </div>
+            <div class="grafico-container">
+              <canvas id="chartRiesgo"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfico de Características -->
+          <div class="grafico-card grafico-full">
+            <div class="grafico-header">
+              <h3>Análisis de Características</h3>
+              <p class="grafico-descripcion">Indicadores de seguridad evaluados</p>
+            </div>
+            <div class="grafico-container">
+              <canvas id="chartCaracteristicas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Características Detalladas -->
+      <div class="caracteristicas-section">
+        <h2 class="section-title">📋 Características Detalladas de la URL</h2>
+
+        <div class="caracteristicas-grid">
+          <!-- Información General -->
+          <div class="caracteristica-card">
+            <h3>ℹ️ Información General</h3>
+            <div class="caracteristica-lista">
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Longitud de URL:</span>
+                <span class="caracteristica-valor">{{ analisis.urllength }} caracteres</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Dominio:</span>
+                <span class="caracteristica-valor">{{ analisis.domain }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Longitud del Dominio:</span>
+                <span class="caracteristica-valor">{{ analisis.domainLength }} caracteres</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Longitud del Path:</span>
+                <span class="caracteristica-valor">{{ analisis.pathLength }} caracteres</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Protocolo:</span>
+                <span class="caracteristica-valor">{{ analisis.protocol }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seguridad -->
+          <div class="caracteristica-card">
+            <h3>🔒 Seguridad</h3>
+            <div class="caracteristica-lista">
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Tiene HTTPS:</span>
+                <span class="caracteristica-valor" [ngClass]="analisis.hasHttps ? 'valor-positivo' : 'valor-negativo'">
+                  {{ analisis.hasHttps ? '✅ Sí' : '❌ No' }}
+                </span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Tiene Query Params:</span>
+                <span class="caracteristica-valor">{{ analisis.hasQuery ? '✅ Sí' : '❌ No' }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Número de Subdominios:</span>
+                <span class="caracteristica-valor">{{ analisis.numberOfSubdomains }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Puntos en Dominio:</span>
+                <span class="caracteristica-valor">{{ analisis.dotsInDomain }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Guiones en Dominio:</span>
+                <span class="caracteristica-valor">{{ analisis.hyphensInDomain }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Caracteres y Dígitos -->
+          <div class="caracteristica-card">
+            <h3>🔤 Caracteres y Dígitos</h3>
+            <div class="caracteristica-lista">
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Caracteres Especiales:</span>
+                <span class="caracteristica-valor">{{ analisis.specialCharactersCount }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Dígitos en URL:</span>
+                <span class="caracteristica-valor">{{ analisis.digitsInUrl }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Dígitos en Dominio:</span>
+                <span class="caracteristica-valor">{{ analisis.digitsInDomain }}</span>
+              </div>
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Dígitos Repetidos:</span>
+                <span class="caracteristica-valor">{{ analisis.hasRepeatedDigits ? '⚠️ Sí' : '✅ No' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Indicadores de Phishing -->
+          <div class="caracteristica-card card-alerta">
+            <h3>⚠️ Indicadores de Phishing</h3>
+            <div class="caracteristica-lista">
+              <div class="caracteristica-item">
+                <span class="caracteristica-label">Palabras Sospechosas:</span>
+                <span class="caracteristica-valor" [ngClass]="analisis.suspiciousKeywordsCount && analisis.suspiciousKeywordsCount > 0 ? 'valor-alerta' : 'valor-ok'">
+                  {{ analisis.suspiciousKeywordsCount || 0 }}
+                </span>
+              </div>
+              <div class="caracteristica-item full-width" *ngIf="analisis.suspiciousKeywords">
+                <span class="caracteristica-label">Lista de Palabras:</span>
+                <span class="caracteristica-valor keywords">{{ analisis.suspiciousKeywords }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información Técnica -->
+      <div class="info-tecnica-section">
+        <h2 class="section-title">⚙️ Información Técnica</h2>
+        <div class="info-tecnica-grid">
+          <div class="info-item">
+            <span class="info-icon">⏱️</span>
+            <div class="info-content">
+              <span class="info-label">Tiempo de Respuesta API</span>
+              <span class="info-value">{{ analisis.apiResponseTime }} ms</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">📌</span>
+            <div class="info-content">
+              <span class="info-label">Versión de Análisis</span>
+              <span class="info-value">{{ analisis.analysisVersion }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">🏷️</span>
+            <div class="info-content">
+              <span class="info-label">Etiqueta</span>
+              <span class="info-value">{{ analisis.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
