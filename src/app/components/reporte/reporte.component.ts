@@ -117,22 +117,23 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Carga el historial completo
+   * ✅ Carga el historial completo DEL USUARIO ACTUAL
+   * El backend filtra automáticamente por el token JWT
    */
   private cargarHistorial(): void {
-    console.log('📊 Obteniendo historial de análisis...');
+    console.log('📊 Obteniendo historial de análisis del usuario actual...');
 
-    // ✅ MODIFICADO: Si hay enlaceId, filtrar por enlace específico
+    // Si hay enlaceId, filtrar por enlace específico
     if (this.enlaceId) {
       console.log('🔗 Filtrando por enlace ID:', this.enlaceId);
       this.cargarHistorialPorEnlace(this.enlaceId);
       return;
     }
 
-    // Si no hay enlaceId, mostrar todo el historial del usuario
+    // El backend filtra automáticamente por el usuario autenticado (via @AuthenticationPrincipal)
     this.analisisService.obtenerAnalisis().subscribe({
       next: (analisis) => {
-        console.log('✅ Historial completo cargado:', analisis.length, 'registros');
+        console.log('✅ Historial del usuario cargado:', analisis.length, 'registros');
         this.historialAnalisis = analisis;
         this.calcularEstadisticas();
         this.cargando = false;

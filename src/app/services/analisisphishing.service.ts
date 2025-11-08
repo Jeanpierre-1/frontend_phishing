@@ -89,6 +89,10 @@ export class AnalisisphishingService {
     );
   }
 
+  /**
+   * Obtiene todos los análisis del usuario autenticado
+   * El backend filtra automáticamente usando @AuthenticationPrincipal
+   */
   obtenerAnalisis(): Observable<AnalisisPhishing[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<AnalisisPhishing[]>(`${this.apiUrl}/analisis`, { headers } );

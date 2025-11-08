@@ -27,6 +27,9 @@ export class HomeComponent {
   aplicacion: string = 'web';
   isAnalyzing: boolean = false;
 
+  // Quick search
+  quickUrl: string = '';
+
   // Resultado
   mostrarResultado: boolean = false;
   esPhishing: boolean = false;
@@ -37,12 +40,90 @@ export class HomeComponent {
   analisisId: number | null = null;
   enlaceId: number | null = null; // ✅ AGREGAR: Para guardar el ID del enlace
 
+  // FAQ
+  faqs = [
+    {
+      pregunta: '¿Qué es el phishing?',
+      respuesta: 'El phishing es una técnica de fraude digital en la que atacantes se hacen pasar por entidades legítimas para engañarte y robar tus datos personales, contraseñas o información bancaria.',
+      expanded: false
+    },
+    {
+      pregunta: '¿Cuáles son los peligros del phishing?',
+      respuesta: 'Riesgo de robo de identidad, pérdida de dinero, acceso indebido a cuentas personales o corporativas, y propagación de malware.',
+      expanded: false
+    },
+    {
+      pregunta: '¿Cómo puedo protegerme contra el phishing?',
+      respuesta: 'Verifica siempre la URL antes de hacer clic. No abras enlaces sospechosos. Activa la autenticación en dos pasos (2FA).',
+      expanded: false
+    },
+    {
+      pregunta: '¿Qué pasa si mi URL es legítima pero el sistema la marca como phishing?',
+      respuesta: 'El sistema puede generar falsos positivos. Por eso te damos un reporte detallado para que entiendas qué características se detectaron y tomes decisiones informadas.',
+      expanded: false
+    },
+    {
+      pregunta: '¿Qué hago si recibo un enlace sospechoso por WhatsApp o Gmail?',
+      respuesta: 'Analízalo con nuestra herramienta antes de abrirlo. Si se confirma que es phishing, repórtalo en la aplicación correspondiente.',
+      expanded: false
+    },
+    {
+      pregunta: '¿Qué ventajas obtengo si me registro en la plataforma?',
+      respuesta: 'Usuarios registrados pueden generar reportes detallados, acceder al historial de análisis y ver estadísticas globales de la comunidad.',
+      expanded: false
+    },
+    {
+      pregunta: '¿Qué hace único a AntiWebPhish frente a otros detectores?',
+      respuesta: 'Además de prevenir ataques, te enseñamos a reconocer las señales de phishing para que cualquiera conozca y aprenda a protegerte.',
+      expanded: false
+    }
+  ];
+
   constructor(
     private analisisService: AnalisisphishingService,
     private enlaceService: EnlaceService,
     private authService: AuthService,
     private router: Router
   ) {}
+
+  /**
+   * Inicia análisis rápido desde el hero section
+   */
+  iniciarAnalisisRapido(): void {
+    const url = this.quickUrl.trim();
+
+    if (!url) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Ingresa una URL',
+        text: 'Por favor ingresa una URL para analizar',
+        confirmButtonColor: '#2563eb'
+      });
+      return;
+    }
+
+    // Copiar la URL al formulario principal
+    this.urlAnalisis = url;
+
+    // Hacer scroll al formulario completo
+    setTimeout(() => {
+      const formSection = document.querySelector('.form-section');
+      if (formSection) {
+        formSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+
+        // Enfocar el campo de mensaje después del scroll
+        setTimeout(() => {
+          const mensajeInput = document.getElementById('mensaje') as HTMLTextAreaElement;
+          if (mensajeInput) {
+            mensajeInput.focus();
+          }
+        }, 800);
+      }
+    }, 100);
+  }
 
   /**
    * Método principal para analizar URL
@@ -522,6 +603,13 @@ verReporteCompleto(): void {
    */
   getNivelRiesgoArray(): number[] {
     return Array(5).fill(0).map((_, i) => i + 1);
+  }
+
+  /**
+   * Toggle FAQ accordion
+   */
+  toggleFaq(index: number): void {
+    this.faqs[index].expanded = !this.faqs[index].expanded;
   }
 
   /**

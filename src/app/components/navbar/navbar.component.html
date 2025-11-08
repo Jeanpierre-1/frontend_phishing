@@ -12,8 +12,9 @@
     </div>
 
     <div class="navbar-actions" *ngIf="showLogoutButton">
-      <button class="btn-nav" [routerLink]="['/home']">🏠 Inicio</button>
-      <button class="btn-nav" [routerLink]="['/reportes']">📊 Reportes</button>
+      <button class="btn-reportes" [routerLink]="['/reportes']">
+        Mis Reportes
+      </button>
       <button class="btn-logout" (click)="logout()">
         Cerrar sesión
       </button>
