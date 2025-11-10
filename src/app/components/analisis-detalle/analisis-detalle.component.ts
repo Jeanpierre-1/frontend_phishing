@@ -287,8 +287,36 @@ export class AnalisisDetalleComponent implements OnInit, OnDestroy {
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
 
-    // Fecha y resultado
-    doc.text(`Fecha: ${new Date(this.analisis.fecha || '').toLocaleString('es-ES')}`, 15, yPos);
+    // Fecha y resultado - usar analysisTimestamp o fecha
+    let fechaFormateada = 'No disponible';
+    const fechaAnalisis = this.analisis.analysisTimestamp || this.analisis.fecha;
+
+    if (fechaAnalisis) {
+      try {
+        let fecha: Date;
+        if (typeof fechaAnalisis === 'string') {
+          // Si es string, parsearlo
+          fecha = new Date(fechaAnalisis);
+        } else {
+          fecha = new Date(fechaAnalisis);
+        }
+
+        if (!isNaN(fecha.getTime())) {
+          fechaFormateada = fecha.toLocaleString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+        }
+      } catch (error) {
+        console.error('Error al formatear fecha:', error);
+      }
+    }
+
+    doc.text(`Fecha: ${fechaFormateada}`, 15, yPos);
     yPos += 7;
 
     const resultado = limpiarTexto(this.analisis.resultado || (this.analisis.isPhishing ? 'PHISHING DETECTADO' : 'Sitio Seguro'));
