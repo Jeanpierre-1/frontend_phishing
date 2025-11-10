@@ -20,7 +20,7 @@ export class EnlaceService {
 
   // Crear un nuevo enlace
 crearEnlace(enlaceDTO: EnlaceDTO): Observable<Enlace> {
-    console.log('📤 Enviando enlace COMPLETO:');
+    console.log('Enviando enlace COMPLETO:');
     console.log('  - URL:', enlaceDTO.url);
     console.log('  - Aplicación:', enlaceDTO.aplicacion);
     console.log('  - Mensaje:', enlaceDTO.mensaje);
@@ -31,9 +31,9 @@ crearEnlace(enlaceDTO: EnlaceDTO): Observable<Enlace> {
 
     return this.http.post<Enlace>(this.apiUrl, enlaceDTO).pipe(
       tap({
-        next: (response) => console.log('✅ Respuesta del servidor:', response),
+        next: (response) => console.log('Respuesta del servidor:', response),
         error: (error) => {
-          console.error('❌ Error detallado:', {
+          console.error('Error detallado:', {
             status: error.status,
             statusText: error.statusText,
             message: error.message,

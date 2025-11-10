@@ -125,8 +125,8 @@ export class AnalisisphishingService {
 
   crearAnalisis(analisisDTO: AnalisisPhishingDTO): Observable<AnalisisPhishing> {
     const headers = this.getAuthHeaders();
-    console.log('📤 Creando análisis:', analisisDTO);
-    console.log('📍 Endpoint:', `${this.apiUrl}/analisis`);
+    console.log('Creando análisis:', analisisDTO);
+    console.log('Endpoint:', `${this.apiUrl}/analisis`);
 
     return this.http.post<AnalisisPhishing>(
       `${this.apiUrl}/analisis`,

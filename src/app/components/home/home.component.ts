@@ -132,10 +132,10 @@ export class HomeComponent {
         // Top aplicaciones
         this.topAplicacionesPhishing = estadisticas.topAplicacionesPhishing;
 
-        console.log('✅ Estadísticas cargadas:', estadisticas);
+        console.log('Estadísticas cargadas:', estadisticas);
       },
       error: (error) => {
-        console.error('❌ Error al cargar estadísticas:', error);
+        console.error('Error al cargar estadísticas:', error);
         // Valores por defecto en caso de error
         this.urlsAnalizadasSemana = 0;
         this.tendenciaUrlsSemana = 0;
@@ -272,23 +272,23 @@ export class HomeComponent {
  private analizarURL(url: string, enlaceId: number): void {
   console.log('🔎 Analizando URL:', url, 'con enlaceId:', enlaceId);
 
-  // ✅ El backend ya guarda el análisis automáticamente
+  // El backend ya guarda el análisis automáticamente
   this.analisisService.analizarUrl(url, enlaceId).subscribe({
     next: (respuesta: PhishingDetectionResponse) => {
-      console.log('✅ Análisis completado:', respuesta);
-      console.log('✅ EnlaceId recibido del backend:', respuesta.enlaceId);
+      console.log('Análisis completado:', respuesta);
+      console.log('EnlaceId recibido del backend:', respuesta.enlaceId);
 
-      // ✅ Usar el enlaceId como analisisId (el backend devuelve el análisis guardado)
+      // Usar el enlaceId como analisisId (el backend devuelve el análisis guardado)
       this.analisisId = enlaceId; // Temporal: usar enlaceId hasta que el backend devuelva analisisId
       this.enlaceId = enlaceId;
 
-      console.log('✅ analisisId asignado:', this.analisisId);
+      console.log('analisisId asignado:', this.analisisId);
 
       // Mostrar resultado directamente
       this.procesarYMostrarResultado(respuesta);
     },
     error: (error) => {
-      console.error('❌ Error al analizar URL:', error);
+      console.error('Error al analizar URL:', error);
       this.finalizarConErrorAnalisis(error);
     }
   });
@@ -342,7 +342,7 @@ private guardarEnlace(url: string): void {
   console.log('Username:', localStorage.getItem('username'));
 
   if (!usuarioIdStr) {
-    console.error('❌ No hay usuarioId en localStorage');
+    console.error('No hay usuarioId en localStorage');
     this.mostrarMensajeNoAutenticado();
     return;
   }
@@ -370,31 +370,23 @@ private guardarEnlace(url: string): void {
 
   this.enlaceService.crearEnlace(enlaceDTO).subscribe({
     next: (enlace: Enlace) => {
-      console.log('✅ Enlace guardado exitosamente:', enlace);
+      console.log('Enlace guardado exitosamente:', enlace);
 
       if (!enlace.id) {
-        console.error('❌ El enlace no tiene ID');
+        console.error('El enlace no tiene ID');
         this.finalizarConError('El enlace se guardó pero no tiene ID');
         return;
       }
 
-      // ✅ AGREGAR: Guardar el enlaceId para usar en el reporte
+      // Guardar el enlaceId para usar en el reporte
       this.enlaceId = enlace.id;
 
       // PASO 2: Analizar la URL
       this.analizarURL(url, enlace.id);
     },
     error: (error) => {
-      console.error('❌ Error al guardar enlace:', error);
-      console.error('📄 Detalles completos del error:', {
-        status: error.status,
-        statusText: error.statusText,
-        message: error.message,
-        error: error.error,
-        headers: error.headers
-      });
-
-      this.finalizarConErrorGuardado(error);
+      console.error('Error al guardar el enlace:', error);
+      this.finalizarConError('No se pudo guardar el enlace');
     }
   });
 }
@@ -418,16 +410,16 @@ private guardarEnlace(url: string): void {
     detalles: respuesta.message || 'Sin detalles adicionales'
   };
 
-  console.log('💾 Guardando resultado de análisis:', analisisDTO);
+  console.log('Guardando resultado de análisis:', analisisDTO);
 
   this.analisisService.crearAnalisis(analisisDTO).subscribe({
     next: (analisis) => {
-      console.log('✅ Análisis guardado:', analisis);
-      console.log('✅ ID del análisis recibido:', analisis.id);
+      console.log('Análisis guardado:', analisis);
+      console.log('ID del análisis recibido:', analisis.id);
       this.analisisId = analisis.id || null;
-      console.log('✅ this.analisisId asignado:', this.analisisId);
+      console.log('this.analisisId asignado:', this.analisisId);
 
-      // ✅ CORRECCIÓN: Asegurarse de que enlaceId se mantenga
+      // Asegurarse de que enlaceId se mantenga
       if (!this.enlaceId && analisis.enlaceId) {
         this.enlaceId = analisis.enlaceId;
       }
@@ -436,8 +428,8 @@ private guardarEnlace(url: string): void {
       this.procesarYMostrarResultado(respuesta);
     },
     error: (error) => {
-      console.error('❌ ERROR al guardar análisis:', error);
-      console.error('❌ No se pudo guardar, this.analisisId será null');
+      console.error('Error al guardar el análisis:', error);
+      console.error('No se pudo guardar, this.analisisId será null');
 
       // Mostrar resultado aunque falle el guardado
       this.procesarYMostrarResultado(respuesta);
@@ -455,11 +447,11 @@ private procesarYMostrarResultado(respuesta: PhishingDetectionResponse): void {
   // ✅ CORRECCIÓN: Usar isPhishing en lugar de esPhishing
   this.esPhishing = respuesta.isPhishing || false;
 
-  // ✅ CORRECCIÓN: Usar probabilityPhishing
+  // Usar probabilityPhishing
   const probability = respuesta.probabilityPhishing || 0;
 
-  console.log('📊 DEBUG - Probability recibida:', probability);
-  console.log('📊 DEBUG - Tipo:', typeof probability);
+  console.log('DEBUG - Probability recibida:', probability);
+  console.log('DEBUG - Tipo:', typeof probability);
 
   // Calcular nivel de riesgo
   this.calcularNivelRiesgo(probability);
@@ -654,13 +646,13 @@ verReporteCompleto(): void {
     return;
   }
 
-  // ✅ Navegar al nuevo componente de detalle de análisis
+  // Navegar al nuevo componente de detalle de análisis
   if (this.analisisId) {
-    console.log('✅ Navegando a análisis específico ID:', this.analisisId);
+    console.log('Navegando a análisis específico ID:', this.analisisId);
     this.router.navigate(['/analisis', this.analisisId]);
   } else {
     // Sin análisis específico, mostrar historial completo
-    console.log('⚠️ No hay análisis ID, navegando a historial');
+    console.log('No hay análisis ID, navegando a historial');
     this.router.navigate(['/reportes']);
   }
 }

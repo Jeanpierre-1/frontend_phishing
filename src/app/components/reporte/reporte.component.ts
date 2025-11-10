@@ -55,7 +55,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
     // Verificar autenticación
     const token = localStorage.getItem('token');
     if (!token) {
-      console.error('❌ No hay token, redirigiendo a login');
+      console.error('No hay token, redirigiendo a login');
       this.router.navigate(['/login']);
       return;
     }
@@ -73,10 +73,10 @@ export class ReporteComponent implements OnInit, OnDestroy {
       }
     });
 
-    // ✅ NUEVO: Obtener enlaceId de query params
+    // NUEVO: Obtener enlaceId de query params
     this.route.queryParamMap.subscribe(queryParams => {
       const enlaceIdParam = queryParams.get('enlaceId');
-      console.log('🔗 EnlaceId desde query params:', enlaceIdParam);
+      console.log('EnlaceId desde query params:', enlaceIdParam);
 
       if (enlaceIdParam) {
         this.enlaceId = parseInt(enlaceIdParam);
@@ -85,17 +85,17 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Carga un análisis específico - SOLO ESE ANÁLISIS
+   * Carga un análisis específico - SOLO ESE ANÁLISIS
    */
   private cargarAnalisisEspecifico(id: number): void {
     console.log('🔄 Cargando análisis específico ID:', id);
 
     this.analisisService.obtenerAnalisisPorId(id).subscribe({
       next: (analisis) => {
-        console.log('✅ Análisis específico cargado:', analisis);
+        console.log('Análisis específico cargado:', analisis);
         this.analisisActual = analisis;
 
-        // ✅ MODIFICADO: Solo mostrar este análisis, no cargar historial adicional
+        // Solo mostrar este análisis, no cargar historial adicional
         this.historialAnalisis = [analisis]; // Solo el análisis actual
         this.calcularEstadisticas();
         this.cargando = false;
@@ -105,7 +105,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
         }, 100);
       },
       error: (error) => {
-        console.error('❌ Error al cargar análisis específico:', error);
+        console.error('Error al cargar análisis específico:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -118,23 +118,23 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Carga el historial general
+   * Carga el historial general
    */
   private cargarHistorialGeneral(): void {
-    console.log('📊 Cargando historial general');
+    console.log('Cargando historial general');
     this.cargarHistorial();
   }
 
   /**
-   * ✅ Carga el historial completo DEL USUARIO ACTUAL
+   * Carga el historial completo DEL USUARIO ACTUAL
    * El backend filtra automáticamente por el token JWT
    */
   private cargarHistorial(): void {
-    console.log('📊 Obteniendo historial de análisis del usuario actual...');
+    console.log('Obteniendo historial de análisis del usuario actual...');
 
     // Si hay enlaceId, filtrar por enlace específico
     if (this.enlaceId) {
-      console.log('🔗 Filtrando por enlace ID:', this.enlaceId);
+      console.log('Filtrando por enlace ID:', this.enlaceId);
       this.cargarHistorialPorEnlace(this.enlaceId);
       return;
     }
@@ -142,7 +142,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
     // El backend filtra automáticamente por el usuario autenticado (via @AuthenticationPrincipal)
     this.analisisService.obtenerAnalisis().subscribe({
       next: (analisis) => {
-        console.log('✅ Historial del usuario cargado:', analisis.length, 'registros');
+        console.log('Historial del usuario cargado:', analisis.length, 'registros');
         this.historialAnalisis = analisis;
         this.calcularEstadisticas();
         this.calcularTotalPaginas(); // Calcular paginación
@@ -154,7 +154,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
         }, 100);
       },
       error: (error) => {
-        console.error('❌ Error al cargar historial:', error);
+        console.error('Error al cargar historial:', error);
         this.cargando = false;
 
         Swal.fire({
@@ -168,14 +168,14 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ NUEVO: Carga el historial filtrado por enlace específico
+   *NUEVO: Carga el historial filtrado por enlace específico
    */
   private cargarHistorialPorEnlace(enlaceId: number): void {
-    console.log('🔗 Obteniendo análisis del enlace ID:', enlaceId);
+    console.log('Obteniendo análisis del enlace ID:', enlaceId);
 
     this.analisisService.obtenerAnalisisPorEnlace(enlaceId).subscribe({
       next: (analisis) => {
-        console.log('✅ Análisis del enlace cargados:', analisis.length, 'registros');
+        console.log('Análisis del enlace cargados:', analisis.length, 'registros');
         this.historialAnalisis = analisis;
         this.calcularEstadisticas();
         this.cargando = false;
@@ -186,7 +186,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
         }, 100);
       },
       error: (error) => {
-        console.error('❌ Error al cargar análisis del enlace:', error);
+        console.error('Error al cargar análisis del enlace:', error);
         this.cargando = false;
 
         Swal.fire({
@@ -200,7 +200,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Calcula las estadísticas
+   * Calcula las estadísticas
    */
   private calcularEstadisticas(): void {
     this.totalAnalisis = this.historialAnalisis.length;
@@ -216,7 +216,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
       ? Math.round((this.phishingDetectado / this.totalAnalisis) * 100)
       : 0;
 
-    console.log('📊 Estadísticas:', {
+    console.log('Estadísticas:', {
       total: this.totalAnalisis,
       phishing: this.phishingDetectado,
       seguros: this.seguros,
@@ -225,7 +225,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Crea todos los gráficos
+   Crea todos los gráficos
    */
   private crearGraficos(): void {
     if (this.analisisActual) {
@@ -238,8 +238,8 @@ export class ReporteComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * ✅ Gráfico de riesgo (donut)
+  /*
+   Gráfico de riesgo (donut)
    */
   private crearGraficoRiesgo(): void {
     const canvas = document.getElementById('chartRiesgo') as HTMLCanvasElement;
@@ -277,7 +277,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Gráfico de historial (bar)
+   *  Gráfico de historial (bar)
    */
   private crearGraficoHistorial(): void {
     const canvas = document.getElementById('chartHistorial') as HTMLCanvasElement;
@@ -313,7 +313,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Gráfico de características
+   *  Gráfico de características
    */
   private crearGraficoCaracteristicas(): void {
     const canvas = document.getElementById('chartCaracteristicas') as HTMLCanvasElement;
@@ -359,7 +359,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Obtiene la clase CSS según el nivel de confianza
+   *  Obtiene la clase CSS según el nivel de confianza
    */
   getConfianzaClass(confianza: number): string {
     if (confianza >= 0.8) return 'confianza-muy-alta';
@@ -370,11 +370,11 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * 🔗 Navega al análisis específico de un enlace
+   *  Navega al análisis específico de un enlace
    */
   verAnalisisEspecifico(enlaceId: number | undefined): void {
     if (!enlaceId || enlaceId === 0) {
-      console.warn('⚠️ No se recibió enlaceId válido');
+      console.warn('No se recibió enlaceId válido');
       Swal.fire({
         icon: 'warning',
         title: 'ID no válido',
@@ -384,12 +384,12 @@ export class ReporteComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('🔗 Navegando al análisis del enlace ID:', enlaceId);
+    console.log('Navegando al análisis del enlace ID:', enlaceId);
     this.router.navigate(['/analisis', enlaceId]);
   }
 
   /**
-   * ✅ Ver detalles de un análisis
+   *  Ver detalles de un análisis
    */
   verDetallesAnalisis(analisis: AnalisisPhishing): void {
     const confianza = analisis.probabilityPhishing || analisis.confianza || 0;
@@ -413,7 +413,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Elimina un análisis
+   * Elimina un análisis
    */
   eliminarAnalisis(analisis: AnalisisPhishing): void {
     const url = analisis.urlEnlace || analisis.enlaceUrl || 'N/A';
@@ -443,7 +443,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
             this.cargarHistorial();
           },
           error: (error) => {
-            console.error('❌ Error al eliminar análisis:', error);
+            console.error('Error al eliminar análisis:', error);
             Swal.fire({
               icon: 'error',
               title: 'Error',
@@ -455,7 +455,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
       }
     });
   }  /**
-   * ✅ Navega al inicio
+   * Navega al inicio
    */
   volverAlInicio(): void {
     this.router.navigate(['/home']);
@@ -684,7 +684,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Limpia los gráficos al destruir el componente
+   * Limpia los gráficos al destruir el componente
    */
   ngOnDestroy(): void {
     if (this.chartRiesgo) this.chartRiesgo.destroy();

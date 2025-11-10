@@ -13,7 +13,7 @@ console.log('AuthGuard ejecutado para:', state.url);
     return true;
   }
   else{
-    console.log('❌ Acceso denegado, redirigiendo a login');
+    console.log('Acceso denegado, redirigiendo a login');
   router.navigate(['/login'], {
     queryParams: { returnUrl: state.url }
   });

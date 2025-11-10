@@ -1382,9 +1382,7 @@
   }
 }
 
-/* ==========================================
-   ESTILOS MEJORADOS PARA VISUALIZACIÓN
-   ========================================== */
+
 
 /* Gráficos Mejorados */
 .graficos-section {
@@ -1695,9 +1693,7 @@
   }
 }
 
-/* ==========================================
-   ESTILOS DE PAGINACIÓN
-   ========================================== */
+/* Paginacion */
 
 .paginacion {
   display: flex;

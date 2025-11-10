@@ -19,17 +19,17 @@ export class AuthService {
     return this.http.post<any>(`${this.baseUrl}/login`, { username, password })
       .pipe(
         tap(response => {
-          console.log('📥 Respuesta completa del login:', response);
+          console.log('Respuesta completa del login:', response);
         }),
         map(response => {
           if (response && response.token) {
             // Guardar token
             localStorage.setItem('token', response.token);
-            console.log('✅ Token guardado');
+            console.log('Token guardado');
 
-            // ✅ NUEVO: Decodificar el token JWT para extraer usuarioId
+            // Decodificar el token JWT para extraer usuarioId
             const tokenData = this.decodificarToken(response.token);
-            console.log('🔓 Datos decodificados del token:', tokenData);
+            console.log('Datos decodificados del token:', tokenData);
 
             // Intentar obtener usuarioId de diferentes fuentes
             let usuarioId = response.usuarioId ||
@@ -45,9 +45,9 @@ export class AuthService {
                 usuarioId = parseInt(usuarioId);
               }
               localStorage.setItem('usuarioId', usuarioId.toString());
-              console.log('✅ UsuarioId guardado:', usuarioId);
+              console.log('UsuarioId guardado:', usuarioId);
             } else {
-              console.warn('⚠️ No se pudo obtener usuarioId del token ni de la respuesta');
+              console.warn('No se pudo obtener usuarioId del token ni de la respuesta');
             }
 
             // Guardar username si viene en la respuesta o en el token
@@ -58,7 +58,7 @@ export class AuthService {
 
             if (usernameValue) {
               localStorage.setItem('username', usernameValue);
-              console.log('✅ Username guardado:', usernameValue);
+              console.log('Username guardado:', usernameValue);
             }
 
             return response;
@@ -67,20 +67,20 @@ export class AuthService {
           }
         }),
         catchError(error => {
-          console.error('❌ Error en login:', error);
+          console.error('Error en login:', error);
           return throwError(() => error);
         })
       );
   }
 
   /**
-   * ✅ NUEVO: Decodifica el payload de un token JWT
+   * Decodifica el payload de un token JWT
    */
   private decodificarToken(token: string): any {
     try {
       const partes = token.split('.');
       if (partes.length !== 3) {
-        console.error('❌ Token JWT inválido (no tiene 3 partes)');
+        console.error('Token JWT inválido (no tiene 3 partes)');
         return null;
       }
 
@@ -90,13 +90,13 @@ export class AuthService {
 
       return datos;
     } catch (error) {
-      console.error('❌ Error al decodificar token:', error);
+      console.error('Error al decodificar token:', error);
       return null;
     }
   }
 
   /**
-   * ✅ NUEVO: Obtiene el usuarioId desde localStorage
+   * Obtiene el usuarioId desde localStorage
    */
   getUsuarioId(): number | null {
     const usuarioIdStr = localStorage.getItem('usuarioId');
@@ -120,7 +120,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('usuarioId');
     localStorage.removeItem('username');
-    console.log('🚪 Sesión cerrada');
+    console.log('Sesión cerrada');
     this.router?.navigate(['/login']);
   }
 
