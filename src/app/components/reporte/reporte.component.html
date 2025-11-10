@@ -311,7 +311,7 @@
         <div class="section-header">
           <h2 class="section-title">📋 Historial de Análisis</h2>
           <div class="historial-info">
-            <span class="info-badge">Mostrando {{ historialAnalisis.length }} {{ historialAnalisis.length === 1 ? 'registro' : 'registros' }}</span>
+            <span class="info-badge">Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} - {{ Math.min(paginaActual * registrosPorPagina, historialAnalisis.length) }} de {{ historialAnalisis.length }} {{ historialAnalisis.length === 1 ? 'registro' : 'registros' }}</span>
           </div>
         </div>
 
@@ -328,9 +328,9 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let analisis of historialAnalisis; let i = index"
+              <tr *ngFor="let analisis of analisisPaginados; let i = index"
                   [ngClass]="analisis.isPhishing ? 'row-phishing' : 'row-seguro'">
-                <td class="td-index">{{ i + 1 }}</td>
+                <td class="td-index">{{ (paginaActual - 1) * registrosPorPagina + i + 1 }}</td>
                 <td class="td-fecha">
                   {{ analisis.analysisTimestamp || analisis.fecha | date:'dd/MM/yyyy HH:mm' }}
                 </td>
@@ -381,6 +381,30 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Controles de Paginación -->
+        <div class="paginacion" *ngIf="totalPaginas > 1">
+          <button class="btn-paginacion"
+                  (click)="paginaAnterior()"
+                  [disabled]="paginaActual === 1">
+            ← Anterior
+          </button>
+
+          <div class="numeros-pagina">
+            <button *ngFor="let pagina of paginasVisibles"
+                    class="btn-pagina"
+                    [class.activa]="pagina === paginaActual"
+                    (click)="cambiarPagina(pagina)">
+              {{ pagina }}
+            </button>
+          </div>
+
+          <button class="btn-paginacion"
+                  (click)="paginaSiguiente()"
+                  [disabled]="paginaActual === totalPaginas">
+            Siguiente →
+          </button>
         </div>
       </div>
 

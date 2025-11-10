@@ -371,14 +371,29 @@ export class AnalisisDetalleComponent implements OnInit, OnDestroy {
       doc.setTextColor(0, 0, 0);
       yPos += 15;
 
-      // Convertir el canvas a imagen con alta calidad
-      const imgData = canvasRiesgo.toDataURL('image/png', 1.0);
-      const imgWidth = 120;
-      const imgHeight = 120;
-      const xPos = (pageWidth - imgWidth) / 2; // Centrar la imagen
+      // Crear canvas temporal con mayor resolución para mejor calidad
+      const scale = 2; // Factor de escala para mejor calidad
+      const tempCanvas = document.createElement('canvas');
+      const originalWidth = canvasRiesgo.width;
+      const originalHeight = canvasRiesgo.height;
 
-      doc.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight);
-      yPos += imgHeight + 20;
+      tempCanvas.width = originalWidth * scale;
+      tempCanvas.height = originalHeight * scale;
+
+      const tempCtx = tempCanvas.getContext('2d');
+      if (tempCtx) {
+        tempCtx.scale(scale, scale);
+        tempCtx.drawImage(canvasRiesgo, 0, 0);
+
+        // Capturar gráfico de alta resolución
+        const imgData = tempCanvas.toDataURL('image/png', 1.0);
+        const imgWidth = 120;
+        const imgHeight = 120;
+        const xPos = (pageWidth - imgWidth) / 2;
+
+        doc.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight);
+        yPos += imgHeight + 20;
+      }
     }
 
     // Características de la URL

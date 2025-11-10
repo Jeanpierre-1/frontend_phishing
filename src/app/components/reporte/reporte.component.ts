@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AnalisisphishingService, AnalisisPhishing } from '../../services/analisisphishing.service';
 import { Chart, registerables } from 'chart.js';
 import Swal from 'sweetalert2';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 Chart.register(...registerables);
 
@@ -15,10 +17,17 @@ Chart.register(...registerables);
   styleUrls: ['./reporte.component.css']
 })
 export class ReporteComponent implements OnInit, OnDestroy {
+  Math = Math; // Para usar Math en el template
+
   analisisActual: AnalisisPhishing | null = null;
   analisisId: number | null = null;
   enlaceId: number | null = null; // ✅ AGREGAR: Para filtrar por enlace específico
   historialAnalisis: AnalisisPhishing[] = [];
+
+  // Paginación
+  paginaActual: number = 1;
+  registrosPorPagina: number = 10;
+  totalPaginas: number = 0;
 
   // Estadísticas
   totalAnalisis: number = 0;
@@ -136,6 +145,7 @@ export class ReporteComponent implements OnInit, OnDestroy {
         console.log('✅ Historial del usuario cargado:', analisis.length, 'registros');
         this.historialAnalisis = analisis;
         this.calcularEstadisticas();
+        this.calcularTotalPaginas(); // Calcular paginación
         this.cargando = false;
 
         // Crear gráficos después de cargar datos
@@ -452,15 +462,225 @@ export class ReporteComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Exporta a PDF (próximamente)
+   * Exportar historial de análisis a PDF
    */
   exportarPDF(): void {
+    // Función auxiliar para limpiar emojis
+    const limpiarTexto = (texto: string): string => {
+      if (!texto) return '';
+      return texto.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F02F}]|[\u{1F0A0}-\u{1F0FF}]|[\u{1F100}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F910}-\u{1F96B}]|[\u{1F980}-\u{1F9E0}]/gu, '')
+        .trim();
+    };
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 20;
+
+    // Encabezado
+    doc.setFillColor(30, 64, 175);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text('Historial de Analisis de Phishing', pageWidth / 2, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text('AntiWebPhish - Reporte Completo', pageWidth / 2, 30, { align: 'center' });
+
+    yPos = 55;
+
+    // Estadísticas Generales
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 64, 175);
+    doc.text('Estadisticas Generales', 15, yPos);
+    doc.setTextColor(0, 0, 0);
+    yPos += 12;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Total de Analisis: ${this.totalAnalisis}`, 15, yPos);
+    yPos += 7;
+    doc.text(`Phishing Detectado: ${this.phishingDetectado}`, 15, yPos);
+    yPos += 7;
+    doc.text(`Sitios Seguros: ${this.seguros}`, 15, yPos);
+    yPos += 7;
+    doc.text(`Porcentaje de Amenazas: ${this.porcentajePhishing.toFixed(2)}%`, 15, yPos);
+    yPos += 20;
+
+    // Historial de Análisis
+    if (this.historialAnalisis.length > 0) {
+      if (yPos > 200) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 64, 175);
+      doc.text('Historial de Analisis', 15, yPos);
+      doc.setTextColor(0, 0, 0);
+      yPos += 10;
+
+      // Preparar datos para la tabla
+      const tableData = this.historialAnalisis.map((analisis, index) => {
+        const fecha = analisis.analysisTimestamp || analisis.fecha;
+        let fechaFormateada = 'N/A';
+        if (fecha) {
+          try {
+            const fechaObj = new Date(fecha);
+            if (!isNaN(fechaObj.getTime())) {
+              fechaFormateada = fechaObj.toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+            }
+          } catch (error) {
+            fechaFormateada = 'N/A';
+          }
+        }
+
+        const url = analisis.enlaceUrl || analisis.urlEnlace || 'N/A';
+        const urlCorta = url.length > 40 ? url.substring(0, 40) + '...' : url;
+        const resultado = limpiarTexto(analisis.resultado || (analisis.isPhishing ? 'PHISHING' : 'SEGURO'));
+        const confianza = ((analisis.probabilityPhishing || analisis.confianza || 0) * 100).toFixed(1) + '%';
+
+        return [
+          (index + 1).toString(),
+          fechaFormateada,
+          urlCorta,
+          resultado,
+          confianza
+        ];
+      });
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['#', 'Fecha', 'URL', 'Resultado', 'Confianza']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [30, 64, 175],
+          textColor: 255,
+          fontStyle: 'bold',
+          fontSize: 10
+        },
+        bodyStyles: {
+          fontSize: 9
+        },
+        columnStyles: {
+          0: { cellWidth: 10 },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 70 },
+          3: { cellWidth: 35 },
+          4: { cellWidth: 25 }
+        },
+        margin: { left: 15, right: 15 },
+        didParseCell: function(data) {
+          // Colorear la columna de resultado
+          if (data.column.index === 3 && data.section === 'body') {
+            const resultado = data.cell.text[0];
+            if (resultado.includes('PHISHING') || resultado.includes('DETECTADO')) {
+              data.cell.styles.textColor = [220, 38, 38];
+              data.cell.styles.fontStyle = 'bold';
+            } else if (resultado.includes('SEGURO')) {
+              data.cell.styles.textColor = [16, 185, 129];
+              data.cell.styles.fontStyle = 'bold';
+            }
+          }
+        }
+      });
+    }
+
+    // Pie de página
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(
+        `Pagina ${i} de ${pageCount} | Generado: ${new Date().toLocaleString('es-ES')}`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: 'center' }
+      );
+    }
+
+    // Descargar
+    const fileName = `historial-analisis-${Date.now()}.pdf`;
+    doc.save(fileName);
+
     Swal.fire({
-      icon: 'info',
-      title: 'Próximamente',
-      text: 'La función de exportar PDF estará disponible pronto',
+      icon: 'success',
+      title: 'PDF Generado!',
+      text: 'El historial se ha descargado correctamente',
       confirmButtonColor: '#2563eb'
     });
+  }
+
+  /**
+   * Obtener análisis paginados
+   */
+  get analisisPaginados(): AnalisisPhishing[] {
+    const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
+    const fin = inicio + this.registrosPorPagina;
+    return this.historialAnalisis.slice(inicio, fin);
+  }
+
+  /**
+   * Calcular total de páginas
+   */
+  calcularTotalPaginas(): void {
+    this.totalPaginas = Math.ceil(this.historialAnalisis.length / this.registrosPorPagina);
+  }
+
+  /**
+   * Cambiar de página
+   */
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual = pagina;
+    }
+  }
+
+  /**
+   * Ir a la página anterior
+   */
+  paginaAnterior(): void {
+    if (this.paginaActual > 1) {
+      this.paginaActual--;
+    }
+  }
+
+  /**
+   * Ir a la página siguiente
+   */
+  paginaSiguiente(): void {
+    if (this.paginaActual < this.totalPaginas) {
+      this.paginaActual++;
+    }
+  }
+
+  /**
+   * Obtener array de números de página para mostrar
+   */
+  get paginasVisibles(): number[] {
+    const paginas: number[] = [];
+    const maxPaginas = 5;
+    let inicio = Math.max(1, this.paginaActual - Math.floor(maxPaginas / 2));
+    let fin = Math.min(this.totalPaginas, inicio + maxPaginas - 1);
+
+    if (fin - inicio < maxPaginas - 1) {
+      inicio = Math.max(1, fin - maxPaginas + 1);
+    }
+
+    for (let i = inicio; i <= fin; i++) {
+      paginas.push(i);
+    }
+
+    return paginas;
   }
 
   /**
