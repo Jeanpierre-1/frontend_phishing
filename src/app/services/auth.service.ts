@@ -18,18 +18,13 @@ export class AuthService {
 
     return this.http.post<any>(`${this.baseUrl}/login`, { username, password })
       .pipe(
-        tap(response => {
-          console.log('Respuesta completa del login:', response);
-        }),
         map(response => {
           if (response && response.token) {
             // Guardar token
             localStorage.setItem('token', response.token);
-            console.log('Token guardado');
 
             // Decodificar el token JWT para extraer usuarioId
             const tokenData = this.decodificarToken(response.token);
-            console.log('Datos decodificados del token:', tokenData);
 
             // Intentar obtener usuarioId de diferentes fuentes
             let usuarioId = response.usuarioId ||
@@ -45,9 +40,6 @@ export class AuthService {
                 usuarioId = parseInt(usuarioId);
               }
               localStorage.setItem('usuarioId', usuarioId.toString());
-              console.log('UsuarioId guardado:', usuarioId);
-            } else {
-              console.warn('No se pudo obtener usuarioId del token ni de la respuesta');
             }
 
             // Guardar username si viene en la respuesta o en el token
@@ -58,7 +50,31 @@ export class AuthService {
 
             if (usernameValue) {
               localStorage.setItem('username', usernameValue);
-              console.log('Username guardado:', usernameValue);
+            }
+
+            // Guardar rol del usuario si viene en la respuesta o en el token
+            // Spring Security devuelve roles como "ROLE_ADMIN" o "ROLE_USER"
+            let userRole = response.role ||
+                           response.rol ||
+                           tokenData?.role ||
+                           tokenData?.rol ||
+                           tokenData?.authorities?.[0]?.authority ||
+                           tokenData?.authorities?.[0] ||
+                           'ROLE_USER'; // Por defecto ROLE_USER si no viene
+
+            // Asegurarse de que el rol tenga el prefijo ROLE_
+            if (!userRole.startsWith('ROLE_')) {
+              userRole = 'ROLE_' + userRole.toUpperCase();
+            }
+
+            localStorage.setItem('userRole', userRole);
+
+            // Solo mostrar logs si es ADMIN
+            if (userRole === 'ROLE_ADMIN') {
+              console.log('[ADMIN] Login exitoso');
+              console.log('[ADMIN] Rol:', userRole);
+              console.log('[ADMIN] Usuario ID:', usuarioId);
+              console.log('[ADMIN] Username:', usernameValue);
             }
 
             return response;
@@ -80,7 +96,6 @@ export class AuthService {
     try {
       const partes = token.split('.');
       if (partes.length !== 3) {
-        console.error('Token JWT inválido (no tiene 3 partes)');
         return null;
       }
 
@@ -90,7 +105,6 @@ export class AuthService {
 
       return datos;
     } catch (error) {
-      console.error('Error al decodificar token:', error);
       return null;
     }
   }
@@ -117,10 +131,16 @@ export class AuthService {
   }
 
   logout() {
+    const wasAdmin = this.isAdmin();
     localStorage.removeItem('token');
     localStorage.removeItem('usuarioId');
     localStorage.removeItem('username');
-    console.log('Sesión cerrada');
+    localStorage.removeItem('userRole');
+
+    if (wasAdmin) {
+      console.log('[ADMIN] Sesión cerrada');
+    }
+
     this.router?.navigate(['/login']);
   }
 
@@ -131,6 +151,15 @@ export class AuthService {
   isAuthenticated(): boolean {
     const token = this.getToken();
     return !!token;
+  }
+
+  isAdmin(): boolean {
+    const userRole = localStorage.getItem('userRole');
+    return userRole === 'ROLE_ADMIN' || userRole === 'ADMIN' || userRole === 'admin';
+  }
+
+  getUserRole(): string | null {
+    return localStorage.getItem('userRole');
   }
 
   handleError(error: any) {

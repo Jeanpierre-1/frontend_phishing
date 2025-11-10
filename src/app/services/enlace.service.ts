@@ -20,18 +20,26 @@ export class EnlaceService {
 
   // Crear un nuevo enlace
 crearEnlace(enlaceDTO: EnlaceDTO): Observable<Enlace> {
-    console.log('Enviando enlace COMPLETO:');
-    console.log('  - URL:', enlaceDTO.url);
-    console.log('  - Aplicación:', enlaceDTO.aplicacion);
-    console.log('  - Mensaje:', enlaceDTO.mensaje);
-    console.log('  - UsuarioId:', enlaceDTO.usuarioId);
-    console.log('  - UsuarioId type:', typeof enlaceDTO.usuarioId);
-    console.log('  - Token disponible:', !!localStorage.getItem('token'));
-    console.log('  - JSON completo:', JSON.stringify(enlaceDTO, null, 2));
+    // Solo mostrar logs si es ADMIN
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'ROLE_ADMIN') {
+      console.log('[ADMIN] Enviando enlace COMPLETO:');
+      console.log('[ADMIN]   - URL:', enlaceDTO.url);
+      console.log('[ADMIN]   - Aplicación:', enlaceDTO.aplicacion);
+      console.log('[ADMIN]   - Mensaje:', enlaceDTO.mensaje);
+      console.log('[ADMIN]   - UsuarioId:', enlaceDTO.usuarioId);
+      console.log('[ADMIN]   - UsuarioId type:', typeof enlaceDTO.usuarioId);
+      console.log('[ADMIN]   - Token disponible:', !!localStorage.getItem('token'));
+      console.log('[ADMIN]   - JSON completo:', JSON.stringify(enlaceDTO, null, 2));
+    }
 
     return this.http.post<Enlace>(this.apiUrl, enlaceDTO).pipe(
       tap({
-        next: (response) => console.log('Respuesta del servidor:', response),
+        next: (response) => {
+          if (userRole === 'ROLE_ADMIN') {
+            console.log('[ADMIN] Respuesta del servidor:', response);
+          }
+        },
         error: (error) => {
           console.error('Error detallado:', {
             status: error.status,

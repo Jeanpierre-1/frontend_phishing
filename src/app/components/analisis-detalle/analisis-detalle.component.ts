@@ -29,20 +29,32 @@ export class AnalisisDetalleComponent implements OnInit, OnDestroy {
     private analisisService: AnalisisphishingService
   ) {}
 
+  /**
+   * Verifica si el usuario actual es administrador
+   */
+  private isAdmin(): boolean {
+    const userRole = localStorage.getItem('userRole');
+    return userRole === 'ROLE_ADMIN';
+  }
+
   ngOnInit(): void {
-    console.log('🎬 AnalisisDetalleComponent inicializado');
+    if (this.isAdmin()) {
+      console.log('[ADMIN] AnalisisDetalleComponent inicializado');
+    }
 
     // Obtener ID del análisis desde la ruta
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
       if (idParam) {
         const id = parseInt(idParam);
-        console.log('📍 ID recibido en ruta:', id);
+        if (this.isAdmin()) {
+          console.log('[ADMIN] ID recibido en ruta:', id);
+        }
 
         // Intentar cargar como ID de análisis
         this.cargarAnalisisPorEnlace(id);
       } else {
-        console.warn('⚠️ No se recibió ID, redirigiendo a home');
+        console.warn('No se recibió ID, redirigiendo a home');
         this.router.navigate(['/home']);
       }
     });
@@ -52,30 +64,36 @@ export class AnalisisDetalleComponent implements OnInit, OnDestroy {
    * Carga el análisis más reciente del enlace
    */
   private cargarAnalisisPorEnlace(enlaceId: number): void {
-    console.log('🔄 Cargando análisis del enlace ID:', enlaceId);
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Cargando análisis del enlace ID:', enlaceId);
+    }
 
     this.analisisService.obtenerAnalisisPorEnlace(enlaceId).subscribe({
       next: (analisis) => {
-        console.log('✅ Análisis encontrados:', analisis);
+        if (this.isAdmin()) {
+          console.log('[ADMIN] Análisis encontrados:', analisis);
+        }
 
         if (analisis && analisis.length > 0) {
           // Tomar el análisis más reciente (último del array)
           this.analisis = analisis[analisis.length - 1];
-          console.log('✅ Mostrando análisis más reciente:', this.analisis);
-          console.log('📏 urllength:', this.analisis.urllength);
-          console.log('📏 Todas las propiedades:', Object.keys(this.analisis));
+          if (this.isAdmin()) {
+            console.log('[ADMIN] Mostrando análisis más reciente:', this.analisis);
+            console.log('[ADMIN] urllength:', this.analisis.urllength);
+            console.log('[ADMIN] Todas las propiedades:', Object.keys(this.analisis));
+          }
           this.cargando = false;
 
           setTimeout(() => {
             this.crearGraficos();
           }, 100);
         } else {
-          console.warn('⚠️ No se encontraron análisis para este enlace');
+          console.warn('No se encontraron análisis para este enlace');
           this.mostrarErrorYRedireccionar('No se encontró el análisis');
         }
       },
       error: (error) => {
-        console.error('❌ Error al cargar análisis del enlace:', error);
+        console.error('Error al cargar análisis del enlace:', error);
         this.mostrarErrorYRedireccionar('No se pudo cargar el análisis');
       }
     });

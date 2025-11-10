@@ -49,8 +49,18 @@ export class ReporteComponent implements OnInit, OnDestroy {
     private analisisService: AnalisisphishingService
   ) {}
 
+  /**
+   * Verifica si el usuario actual es administrador
+   */
+  private isAdmin(): boolean {
+    const userRole = localStorage.getItem('userRole');
+    return userRole === 'ROLE_ADMIN';
+  }
+
   ngOnInit(): void {
-    console.log('🎬 ReporteComponent inicializado');
+    if (this.isAdmin()) {
+      console.log('[ADMIN] ReporteComponent inicializado');
+    }
 
     // Verificar autenticación
     const token = localStorage.getItem('token');
@@ -63,7 +73,9 @@ export class ReporteComponent implements OnInit, OnDestroy {
     // Obtener parámetros de la ruta
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
-      console.log('📋 ID de análisis desde ruta:', idParam);
+      if (this.isAdmin()) {
+        console.log('[ADMIN] ID de análisis desde ruta:', idParam);
+      }
 
       if (idParam) {
         this.analisisId = parseInt(idParam);
@@ -76,7 +88,9 @@ export class ReporteComponent implements OnInit, OnDestroy {
     // NUEVO: Obtener enlaceId de query params
     this.route.queryParamMap.subscribe(queryParams => {
       const enlaceIdParam = queryParams.get('enlaceId');
-      console.log('EnlaceId desde query params:', enlaceIdParam);
+      if (this.isAdmin()) {
+        console.log('[ADMIN] EnlaceId desde query params:', enlaceIdParam);
+      }
 
       if (enlaceIdParam) {
         this.enlaceId = parseInt(enlaceIdParam);
@@ -88,11 +102,15 @@ export class ReporteComponent implements OnInit, OnDestroy {
    * Carga un análisis específico - SOLO ESE ANÁLISIS
    */
   private cargarAnalisisEspecifico(id: number): void {
-    console.log('🔄 Cargando análisis específico ID:', id);
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Cargando análisis específico ID:', id);
+    }
 
     this.analisisService.obtenerAnalisisPorId(id).subscribe({
       next: (analisis) => {
-        console.log('Análisis específico cargado:', analisis);
+        if (this.isAdmin()) {
+          console.log('[ADMIN] Análisis específico cargado:', analisis);
+        }
         this.analisisActual = analisis;
 
         // Solo mostrar este análisis, no cargar historial adicional
@@ -121,7 +139,9 @@ export class ReporteComponent implements OnInit, OnDestroy {
    * Carga el historial general
    */
   private cargarHistorialGeneral(): void {
-    console.log('Cargando historial general');
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Cargando historial general');
+    }
     this.cargarHistorial();
   }
 
@@ -130,11 +150,15 @@ export class ReporteComponent implements OnInit, OnDestroy {
    * El backend filtra automáticamente por el token JWT
    */
   private cargarHistorial(): void {
-    console.log('Obteniendo historial de análisis del usuario actual...');
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Obteniendo historial de análisis del usuario actual...');
+    }
 
     // Si hay enlaceId, filtrar por enlace específico
     if (this.enlaceId) {
-      console.log('Filtrando por enlace ID:', this.enlaceId);
+      if (this.isAdmin()) {
+        console.log('[ADMIN] Filtrando por enlace ID:', this.enlaceId);
+      }
       this.cargarHistorialPorEnlace(this.enlaceId);
       return;
     }
@@ -142,7 +166,9 @@ export class ReporteComponent implements OnInit, OnDestroy {
     // El backend filtra automáticamente por el usuario autenticado (via @AuthenticationPrincipal)
     this.analisisService.obtenerAnalisis().subscribe({
       next: (analisis) => {
-        console.log('Historial del usuario cargado:', analisis.length, 'registros');
+        if (this.isAdmin()) {
+          console.log('[ADMIN] Historial del usuario cargado:', analisis.length, 'registros');
+        }
         this.historialAnalisis = analisis;
         this.calcularEstadisticas();
         this.calcularTotalPaginas(); // Calcular paginación
@@ -171,11 +197,15 @@ export class ReporteComponent implements OnInit, OnDestroy {
    *NUEVO: Carga el historial filtrado por enlace específico
    */
   private cargarHistorialPorEnlace(enlaceId: number): void {
-    console.log('Obteniendo análisis del enlace ID:', enlaceId);
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Obteniendo análisis del enlace ID:', enlaceId);
+    }
 
     this.analisisService.obtenerAnalisisPorEnlace(enlaceId).subscribe({
       next: (analisis) => {
-        console.log('Análisis del enlace cargados:', analisis.length, 'registros');
+        if (this.isAdmin()) {
+          console.log('[ADMIN] Análisis del enlace cargados:', analisis.length, 'registros');
+        }
         this.historialAnalisis = analisis;
         this.calcularEstadisticas();
         this.cargando = false;
@@ -216,12 +246,14 @@ export class ReporteComponent implements OnInit, OnDestroy {
       ? Math.round((this.phishingDetectado / this.totalAnalisis) * 100)
       : 0;
 
-    console.log('Estadísticas:', {
-      total: this.totalAnalisis,
-      phishing: this.phishingDetectado,
-      seguros: this.seguros,
-      porcentaje: this.porcentajePhishing
-    });
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Estadísticas:', {
+        total: this.totalAnalisis,
+        phishing: this.phishingDetectado,
+        seguros: this.seguros,
+        porcentaje: this.porcentajePhishing
+      });
+    }
   }
 
   /**
@@ -384,7 +416,9 @@ export class ReporteComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('Navegando al análisis del enlace ID:', enlaceId);
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Navegando al análisis del enlace ID:', enlaceId);
+    }
     this.router.navigate(['/analisis', enlaceId]);
   }
 

@@ -5,20 +5,22 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = new AuthService();
   const router = new Router();
 
-console.log('AuthGuard ejecutado para:', state.url);
-  console.log('Usuario autenticado:', authService.isAuthenticated());
-
+  const userRole = localStorage.getItem('userRole');
+  if (userRole === 'ROLE_ADMIN') {
+    console.log('[ADMIN] AuthGuard ejecutado para:', state.url);
+    console.log('[ADMIN] Usuario autenticado:', authService.isAuthenticated());
+  }
 
   if(authService.isAuthenticated()){
     return true;
   }
   else{
-    console.log('Acceso denegado, redirigiendo a login');
-  router.navigate(['/login'], {
-    queryParams: { returnUrl: state.url }
-  });
-  return false;
+    if (userRole === 'ROLE_ADMIN') {
+      console.log('[ADMIN] Acceso denegado, redirigiendo a login');
+    }
+    router.navigate(['/login'], {
+      queryParams: { returnUrl: state.url }
+    });
+    return false;
   }
-
-
 };

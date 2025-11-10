@@ -56,12 +56,14 @@ export class LoginComponent {
  private login(): void {
   this.isLoading = true;
 
-  console.log('🔐 Intentando login con:', this.username.trim());
-
   // CORREGIR: Pasar username y password como parámetros separados
   this.authService.login(this.username.trim(), this.password.trim()).subscribe({
     next: (response) => {
-      console.log('✅ Login exitoso:', response);
+      // Solo mostrar logs si es ADMIN
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'ROLE_ADMIN') {
+        console.log('[ADMIN] Login exitoso desde componente');
+      }
 
       Swal.fire({
         icon: 'success',
@@ -76,7 +78,8 @@ export class LoginComponent {
       this.isLoading = false;
     },
     error: (error) => {
-      console.error('❌ Error en login:', error);
+      // Los errores siempre se muestran para facilitar soporte
+      console.error('Error en login:', error);
       this.isLoading = false;
       this.handleLoginError(error);
     }

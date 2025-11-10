@@ -11,6 +11,7 @@ import {
 import { EnlaceService, EnlaceDTO } from '../../services/enlace.service';
 import { Enlace } from '../../models/enlace';
 import { AuthService } from '../../services/auth.service';
+import { LoggerService } from '../../services/logger.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -105,8 +106,17 @@ export class HomeComponent {
     private analisisService: AnalisisphishingService,
     private enlaceService: EnlaceService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private logger: LoggerService
   ) {}
+
+  /**
+   * Verifica si el usuario actual es administrador
+   */
+  private isAdmin(): boolean {
+    const userRole = localStorage.getItem('userRole');
+    return userRole === 'ROLE_ADMIN';
+  }
 
   ngOnInit(): void {
     this.cargarEstadisticas();
@@ -132,7 +142,10 @@ export class HomeComponent {
         // Top aplicaciones
         this.topAplicacionesPhishing = estadisticas.topAplicacionesPhishing;
 
-        console.log('Estadísticas cargadas:', estadisticas);
+        // Solo log si es admin
+        if (this.isAdmin()) {
+          console.log('[ADMIN] Estadísticas cargadas');
+        }
       },
       error: (error) => {
         console.error('Error al cargar estadísticas:', error);
@@ -258,7 +271,9 @@ export class HomeComponent {
    * Ejecuta el flujo completo de análisis
    */
   private ejecutarFlujoDeAnalisis(url: string): void {
-    console.log('🚀 Iniciando análisis para:', url);
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Iniciando análisis para:', url);
+    }
 
     // PASO 1: Guardar el enlace en BD
     this.guardarEnlace(url);
@@ -270,19 +285,25 @@ export class HomeComponent {
    * Analiza la URL usando el servicio de detección de phishing
    */
  private analizarURL(url: string, enlaceId: number): void {
-  console.log('🔎 Analizando URL:', url, 'con enlaceId:', enlaceId);
+  if (this.isAdmin()) {
+    console.log('[ADMIN] Analizando URL:', url, 'con enlaceId:', enlaceId);
+  }
 
   // El backend ya guarda el análisis automáticamente
   this.analisisService.analizarUrl(url, enlaceId).subscribe({
     next: (respuesta: PhishingDetectionResponse) => {
-      console.log('Análisis completado:', respuesta);
-      console.log('EnlaceId recibido del backend:', respuesta.enlaceId);
+      if (this.isAdmin()) {
+        console.log('[ADMIN] Análisis completado:', respuesta);
+        console.log('[ADMIN] EnlaceId recibido del backend:', respuesta.enlaceId);
+      }
 
       // Usar el enlaceId como analisisId (el backend devuelve el análisis guardado)
       this.analisisId = enlaceId; // Temporal: usar enlaceId hasta que el backend devuelva analisisId
       this.enlaceId = enlaceId;
 
-      console.log('analisisId asignado:', this.analisisId);
+      if (this.isAdmin()) {
+        console.log('[ADMIN] analisisId asignado:', this.analisisId);
+      }
 
       // Mostrar resultado directamente
       this.procesarYMostrarResultado(respuesta);
@@ -336,10 +357,12 @@ private guardarEnlace(url: string): void {
   // ✅ Obtener el usuarioId desde localStorage
   const usuarioIdStr = localStorage.getItem('usuarioId');
 
-  console.log('=== VERIFICACIÓN DE DATOS ===');
-  console.log('Token:', localStorage.getItem('token'));
-  console.log('UsuarioId string:', usuarioIdStr);
-  console.log('Username:', localStorage.getItem('username'));
+  if (this.isAdmin()) {
+    console.log('[ADMIN] === VERIFICACIÓN DE DATOS ===');
+    console.log('[ADMIN] Token disponible:', !!localStorage.getItem('token'));
+    console.log('[ADMIN] UsuarioId string:', usuarioIdStr);
+    console.log('[ADMIN] Username:', localStorage.getItem('username'));
+  }
 
   if (!usuarioIdStr) {
     console.error('No hay usuarioId en localStorage');
@@ -349,8 +372,10 @@ private guardarEnlace(url: string): void {
 
   const usuarioId = parseInt(usuarioIdStr);
 
-  console.log('UsuarioId parseado:', usuarioId);
-  console.log('Es número válido?:', !isNaN(usuarioId));
+  if (this.isAdmin()) {
+    console.log('[ADMIN] UsuarioId parseado:', usuarioId);
+    console.log('[ADMIN] Es número válido?:', !isNaN(usuarioId));
+  }
 
   // ✅ Construir el DTO completo
   const enlaceDTO: EnlaceDTO = {
@@ -360,17 +385,21 @@ private guardarEnlace(url: string): void {
     usuarioId: usuarioId
   };
 
-  console.log('📋 DTO construido:', enlaceDTO);
-  console.log('📋 Tipo de cada campo:', {
-    url: typeof enlaceDTO.url,
-    aplicacion: typeof enlaceDTO.aplicacion,
-    mensaje: typeof enlaceDTO.mensaje,
-    usuarioId: typeof enlaceDTO.usuarioId
-  });
+  if (this.isAdmin()) {
+    console.log('[ADMIN] DTO construido:', enlaceDTO);
+    console.log('[ADMIN] Tipo de cada campo:', {
+      url: typeof enlaceDTO.url,
+      aplicacion: typeof enlaceDTO.aplicacion,
+      mensaje: typeof enlaceDTO.mensaje,
+      usuarioId: typeof enlaceDTO.usuarioId
+    });
+  }
 
   this.enlaceService.crearEnlace(enlaceDTO).subscribe({
     next: (enlace: Enlace) => {
-      console.log('Enlace guardado exitosamente:', enlace);
+      if (this.isAdmin()) {
+        console.log('[ADMIN] Enlace guardado exitosamente:', enlace);
+      }
 
       if (!enlace.id) {
         console.error('El enlace no tiene ID');
@@ -410,14 +439,18 @@ private guardarEnlace(url: string): void {
     detalles: respuesta.message || 'Sin detalles adicionales'
   };
 
-  console.log('Guardando resultado de análisis:', analisisDTO);
+  if (this.isAdmin()) {
+    console.log('[ADMIN] Guardando resultado de análisis:', analisisDTO);
+  }
 
   this.analisisService.crearAnalisis(analisisDTO).subscribe({
     next: (analisis) => {
-      console.log('Análisis guardado:', analisis);
-      console.log('ID del análisis recibido:', analisis.id);
+      if (this.isAdmin()) {
+        console.log('[ADMIN] Análisis guardado:', analisis);
+        console.log('[ADMIN] ID del análisis recibido:', analisis.id);
+        console.log('[ADMIN] this.analisisId asignado:', this.analisisId);
+      }
       this.analisisId = analisis.id || null;
-      console.log('this.analisisId asignado:', this.analisisId);
 
       // Asegurarse de que enlaceId se mantenga
       if (!this.enlaceId && analisis.enlaceId) {
@@ -450,8 +483,10 @@ private procesarYMostrarResultado(respuesta: PhishingDetectionResponse): void {
   // Usar probabilityPhishing
   const probability = respuesta.probabilityPhishing || 0;
 
-  console.log('DEBUG - Probability recibida:', probability);
-  console.log('DEBUG - Tipo:', typeof probability);
+  if (this.isAdmin()) {
+    console.log('[ADMIN] DEBUG - Probability recibida:', probability);
+    console.log('[ADMIN] DEBUG - Tipo:', typeof probability);
+  }
 
   // Calcular nivel de riesgo
   this.calcularNivelRiesgo(probability);
@@ -618,13 +653,15 @@ isAuthenticated(): boolean {
   /**
    * Navega al reporte completo (requiere autenticación)
    */
- /**
+  /**
  * Navega al reporte completo pasando el análisis actual
  */
 verReporteCompleto(): void {
-  console.log('🔍 DEBUG - verReporteCompleto()');
-  console.log('🔍 enlaceId:', this.enlaceId);
-  console.log('🔍 analisisId:', this.analisisId);
+  if (this.isAdmin()) {
+    console.log('[ADMIN] DEBUG - verReporteCompleto()');
+    console.log('[ADMIN] enlaceId:', this.enlaceId);
+    console.log('[ADMIN] analisisId:', this.analisisId);
+  }
 
   if (!this.authService.isAuthenticated()) {
     Swal.fire({
@@ -648,11 +685,15 @@ verReporteCompleto(): void {
 
   // Navegar al nuevo componente de detalle de análisis
   if (this.analisisId) {
-    console.log('Navegando a análisis específico ID:', this.analisisId);
+    if (this.isAdmin()) {
+      console.log('[ADMIN] Navegando a análisis específico ID:', this.analisisId);
+    }
     this.router.navigate(['/analisis', this.analisisId]);
   } else {
     // Sin análisis específico, mostrar historial completo
-    console.log('No hay análisis ID, navegando a historial');
+    if (this.isAdmin()) {
+      console.log('[ADMIN] No hay análisis ID, navegando a historial');
+    }
     this.router.navigate(['/reportes']);
   }
 }

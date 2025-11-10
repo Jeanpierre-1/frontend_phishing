@@ -99,8 +99,12 @@ export class AnalisisphishingService {
     const request: PhishingAnalysisRequest = { url };
 
    const headers = this.getAuthHeaders();
-    console.log('Analizando URL:', request);
-    console.log('Endpoint:', `${this.apiUrl}/phishing/analyze`);
+    // Solo mostrar logs si es ADMIN
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'ROLE_ADMIN') {
+      console.log('[ADMIN] Analizando URL:', request);
+      console.log('[ADMIN] Endpoint:', `${this.apiUrl}/phishing/analyze`);
+    }
 
     return this.http.post<PhishingDetectionResponse>(
       `${this.apiUrl}/phishing/analyze`,
@@ -125,8 +129,12 @@ export class AnalisisphishingService {
 
   crearAnalisis(analisisDTO: AnalisisPhishingDTO): Observable<AnalisisPhishing> {
     const headers = this.getAuthHeaders();
-    console.log('Creando análisis:', analisisDTO);
-    console.log('Endpoint:', `${this.apiUrl}/analisis`);
+    // Solo mostrar logs si es ADMIN
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'ROLE_ADMIN') {
+      console.log('[ADMIN] Creando análisis:', analisisDTO);
+      console.log('[ADMIN] Endpoint:', `${this.apiUrl}/analisis`);
+    }
 
     return this.http.post<AnalisisPhishing>(
       `${this.apiUrl}/analisis`,
