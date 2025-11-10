@@ -226,10 +226,12 @@
           </svg>
         </div>
         <div class="stat-content">
-          <h3>Urls analizadas hoy</h3>
-          <p class="stat-number">600</p>
+          <h3>URLs analizadas esta semana</h3>
+          <p class="stat-number">{{ urlsAnalizadasSemana }}</p>
           <div class="stat-trend">
-            <span class="trend-up">+12%</span> vs ayer
+            <span [class]="tendenciaUrlsSemana >= 0 ? 'trend-up' : 'trend-down'">
+              {{ tendenciaUrlsSemana >= 0 ? '+' : '' }}{{ tendenciaUrlsSemana | number:'1.1-1' }}%
+            </span> vs semana anterior
           </div>
         </div>
       </div>
@@ -242,9 +244,11 @@
         </div>
         <div class="stat-content">
           <h3>Total de análisis</h3>
-          <p class="stat-number">2,135</p>
+          <p class="stat-number">{{ totalAnalisis }}</p>
           <div class="stat-trend">
-            <span class="trend-up">+8.3%</span> este mes
+            <span [class]="tendenciaAnalisisMes >= 0 ? 'trend-up' : 'trend-down'">
+              {{ tendenciaAnalisisMes >= 0 ? '+' : '' }}{{ tendenciaAnalisisMes | number:'1.1-1' }}%
+            </span> este mes
           </div>
         </div>
       </div>
@@ -259,10 +263,10 @@
           </svg>
         </div>
         <div class="stat-content">
-          <h3>Usuarios activos</h3>
-          <p class="stat-number">200</p>
+          <h3>Usuarios registrados</h3>
+          <p class="stat-number">{{ usuariosRegistrados }}</p>
           <div class="stat-trend">
-            <span class="trend-up">+23</span> conectados
+            <span class="trend-up">Total</span> en el sistema
           </div>
         </div>
       </div>
@@ -289,7 +293,7 @@
                 stroke="rgba(51, 65, 85, 0.6)"
                 stroke-width="40"
               />
-              <!-- Círculo de amenazas (65% phishing) -->
+              <!-- Círculo de amenazas (phishing) -->
               <circle
                 cx="100"
                 cy="100"
@@ -297,7 +301,7 @@
                 fill="transparent"
                 stroke="url(#gradient-danger)"
                 stroke-width="40"
-                stroke-dasharray="286 440"
+                [attr.stroke-dasharray]="(distribucionGlobal.porcentajePhishing * 4.4) + ' 440'"
                 stroke-dashoffset="0"
                 transform="rotate(-90 100 100)"
                 class="chart-segment phishing-segment"
@@ -322,7 +326,7 @@
               />
             </svg>
             <div class="chart-center-text">
-              <div class="center-percentage">65%</div>
+              <div class="center-percentage">{{ distribucionGlobal.porcentajePhishing | number:'1.0-0' }}%</div>
               <div class="center-label">Amenazas</div>
             </div>
           </div>
@@ -331,14 +335,14 @@
               <span class="legend-box phishing"></span>
               <div class="legend-content">
                 <span class="legend-label">Phishing detectado</span>
-                <span class="legend-value">65%</span>
+                <span class="legend-value">{{ distribucionGlobal.porcentajePhishing | number:'1.1-1' }}%</span>
               </div>
             </div>
             <div class="legend-item legend-safe">
               <span class="legend-box legit"></span>
               <div class="legend-content">
                 <span class="legend-label">URLs Legítimas</span>
-                <span class="legend-value">35%</span>
+                <span class="legend-value">{{ distribucionGlobal.porcentajeLegitimas | number:'1.1-1' }}%</span>
               </div>
             </div>
           </div>
@@ -355,49 +359,24 @@
           Top aplicaciones con intentos de phishing
         </h3>
         <div class="apps-bars">
-          <div class="app-bar">
+          <div class="app-bar" *ngFor="let app of topAplicacionesPhishing; let i = index">
             <div class="app-info">
-              <span class="app-name">WhatsApp</span>
-              <span class="app-percentage">100%</span>
+              <span class="app-name">{{ app.aplicacion }}</span>
+              <span class="app-percentage">{{ app.porcentaje | number:'1.0-0' }}%</span>
             </div>
             <div class="bar-track">
-              <div class="bar-fill bar-1" style="width: 100%">
+              <div
+                class="bar-fill"
+                [ngClass]="'bar-' + (i + 1)"
+                [style.width.%]="app.porcentaje">
                 <span class="bar-glow"></span>
               </div>
             </div>
           </div>
-          <div class="app-bar">
-            <div class="app-info">
-              <span class="app-name">Facebook</span>
-              <span class="app-percentage">70%</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill bar-2" style="width: 70%">
-                <span class="bar-glow"></span>
-              </div>
-            </div>
-          </div>
-          <div class="app-bar">
-            <div class="app-info">
-              <span class="app-name">Gmail</span>
-              <span class="app-percentage">55%</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill bar-3" style="width: 55%">
-                <span class="bar-glow"></span>
-              </div>
-            </div>
-          </div>
-          <div class="app-bar">
-            <div class="app-info">
-              <span class="app-name">Instagram</span>
-              <span class="app-percentage">60%</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill bar-4" style="width: 60%">
-                <span class="bar-glow"></span>
-              </div>
-            </div>
+
+          <!-- Mensaje cuando no hay datos -->
+          <div *ngIf="topAplicacionesPhishing.length === 0" class="no-data-message">
+            <p>No hay datos de aplicaciones disponibles</p>
           </div>
         </div>
       </div>

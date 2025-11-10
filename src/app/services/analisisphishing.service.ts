@@ -60,6 +60,25 @@ export interface PhishingAnalysisRequest {
   url: string;
 }
 
+export interface Estadisticas {
+  urlsAnalizadasEstaSemana: number;
+  porcentajeCambioSemana: number;
+  totalAnalisis: number;
+  porcentajeCambioMes: number;
+  usuariosRegistrados: number;
+  distribucionGlobal: {
+    totalPhishing: number;
+    totalLegitimas: number;
+    porcentajePhishing: number;
+    porcentajeLegitimas: number;
+  };
+  topAplicacionesPhishing: Array<{
+    aplicacion: string;
+    cantidad: number;
+    porcentaje: number;
+  }>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -143,5 +162,13 @@ export class AnalisisphishingService {
     return this.http.get<AnalisisPhishing[]>(
       `${this.apiUrl}/analisis/usuario/${usuarioId}`, { headers }
     );
+  }
+
+  /**
+   * Obtiene las estadísticas generales del sistema
+   */
+  obtenerEstadisticas(): Observable<Estadisticas> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<Estadisticas>(`${this.apiUrl}/estadisticas`, { headers });
   }
 }

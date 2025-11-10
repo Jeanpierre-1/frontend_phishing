@@ -30,6 +30,28 @@ export class HomeComponent {
   // Quick search
   quickUrl: string = '';
 
+  // Estadísticas dinámicas
+  urlsAnalizadasSemana: number = 0;
+  totalAnalisis: number = 0;
+  usuariosRegistrados: number = 156; // Este valor vendría del backend en producción
+  tendenciaUrlsSemana: number = 0;
+  tendenciaAnalisisMes: number = 0;
+
+  // Distribución global
+  distribucionGlobal = {
+    totalPhishing: 0,
+    totalLegitimas: 0,
+    porcentajePhishing: 0,
+    porcentajeLegitimas: 0
+  };
+
+  // Top aplicaciones
+  topAplicacionesPhishing: Array<{
+    aplicacion: string;
+    cantidad: number;
+    porcentaje: number;
+  }> = [];
+
   // Resultado
   mostrarResultado: boolean = false;
   esPhishing: boolean = false;
@@ -85,6 +107,51 @@ export class HomeComponent {
     private authService: AuthService,
     private router: Router
   ) {}
+
+  ngOnInit(): void {
+    this.cargarEstadisticas();
+  }
+
+  /**
+   * Carga las estadísticas dinámicas del dashboard
+   */
+  cargarEstadisticas(): void {
+    // Obtener estadísticas del backend
+    this.analisisService.obtenerEstadisticas().subscribe({
+      next: (estadisticas) => {
+        // Asignar valores directamente desde el backend
+        this.urlsAnalizadasSemana = estadisticas.urlsAnalizadasEstaSemana;
+        this.tendenciaUrlsSemana = estadisticas.porcentajeCambioSemana;
+        this.totalAnalisis = estadisticas.totalAnalisis;
+        this.tendenciaAnalisisMes = estadisticas.porcentajeCambioMes;
+        this.usuariosRegistrados = estadisticas.usuariosRegistrados;
+
+        // Distribución global
+        this.distribucionGlobal = estadisticas.distribucionGlobal;
+
+        // Top aplicaciones
+        this.topAplicacionesPhishing = estadisticas.topAplicacionesPhishing;
+
+        console.log('✅ Estadísticas cargadas:', estadisticas);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar estadísticas:', error);
+        // Valores por defecto en caso de error
+        this.urlsAnalizadasSemana = 0;
+        this.tendenciaUrlsSemana = 0;
+        this.totalAnalisis = 0;
+        this.tendenciaAnalisisMes = 0;
+        this.usuariosRegistrados = 0;
+        this.distribucionGlobal = {
+          totalPhishing: 0,
+          totalLegitimas: 0,
+          porcentajePhishing: 0,
+          porcentajeLegitimas: 0
+        };
+        this.topAplicacionesPhishing = [];
+      }
+    });
+  }
 
   /**
    * Inicia análisis rápido desde el hero section
